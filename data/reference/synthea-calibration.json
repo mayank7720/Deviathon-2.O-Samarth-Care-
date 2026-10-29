@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "title": "MITRE Synthea April 2020 sample CSV",
+    "url": "https://synthetichealth.github.io/synthea-sample-data/downloads/synthea_sample_data_csv_apr2020.zip",
+    "documentation": "https://synthetichealth.github.io/downloads.html",
+    "paper": "https://doi.org/10.1093/jamia/ocx079",
+    "archiveSha256": "4194b18c11eaedcf0d5d5dd448d8ac9661f14381e2ef9f109215dc42266cd38a",
+    "archiveBytes": 8982431,
+    "synthetic": true,
+    "allSampleIdentities": 1171,
+    "reuse": "Official download page states data is free from cost, privacy and security restrictions."
+  },
+  "population": "US synthetic sample; observations at ages 60-110. Not an Indian geriatric cohort.",
+  "distributions": {
+    "systolic": {
+      "available": true,
+      "people": 296,
+      "observations": 3558,
+      "unit": "mm[Hg]",
+      "p10": 113.75,
+      "median": 119.5,
+      "p90": 127.0,
+      "minimum": 108.0,
+      "maximum": 190.0,
+      "aggregation": "One median per synthetic identity at observation age 60-110; distribution across identity medians."
+    },
+    "diastolic": {
+      "available": true,
+      "people": 296,
+      "observations": 3558,
+      "unit": "mm[Hg]",
+      "p10": 76.0,
+      "median": 80.0,
+      "p90": 83.0,
+      "minimum": 72.0,
+      "maximum": 109.0,
+      "aggregation": "One median per synthetic identity at observation age 60-110; distribution across identity medians."
+    },
+    "glucose": {
+      "available": true,
+      "people": 220,
+      "observations": 3419,
+      "unit": "mg/dL",
+      "p10": 74.75,
+      "median": 82.03,
+      "p90": 92.51,
+      "minimum": 66.1,
+      "maximum": 161.9,
+      "aggregation": "One median per synthetic identity at observation age 60-110; distribution across identity medians."
+    },
+    "weight": {
+      "available": true,
+      "people": 296,
+      "observations": 3243,
+      "unit": "kg",
+      "p10": 71.35,
+      "median": 82.47,
+      "p90": 95.7,
+      "minimum": 60.0,
+      "maximum": 129.0,
+      "aggregation": "One median per synthetic identity at observation age 60-110; distribution across identity medians."
+    },
+    "spo2": {
+      "available": false,
+      "reason": "No compatible observations in this reference archive."
+    }
+  },
+  "rejectedUnitCounts": {
+    "systolic": 0,
+    "diastolic": 0,
+    "glucose": 0,
+    "weight": 0,
+    "spo2": 0
+  },
+  "limitations": [
+    "This is an externally authored synthetic reference, not observed patient data.",
+    "No decline labels, predictive validation, diagnostic accuracy or population prevalence are inferred from this archive.",
+    "Daily autocorrelation, observation scheduling, symptoms, medication-taking and fall events in Samarth Care are explicitly authored simulation assumptions.",
+    "Unavailable modalities retain disclosed illustrative assumptions. Medication orders do not establish whether a person took a dose."
+  ]
+}

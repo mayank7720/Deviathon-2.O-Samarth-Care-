@@ -1,0 +1,1 @@
+ALTER TABLE `care_deliveries` ADD `claimed_at` text;

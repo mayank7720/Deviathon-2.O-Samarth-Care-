@@ -1,0 +1,19 @@
+; Replace these local hardware identifiers only after Linux/Bluetooth acceptance.
+; This file contains no API credentials. Use the configuration filename supported
+; by your installed Asterisk version (current source: chan_mobile.conf).
+[general]
+interval=30
+
+[adapter]
+id=samarth-bt
+address=00:00:00:00:00:01
+
+[samarthphone]
+address=00:00:00:00:00:02
+port=1
+context=samarth-mobile-inbound
+adapter=samarth-bt
+group=1
+sms=no
+; port is discovered using "mobile search"; the values above are placeholders.
+; SMS remains on the existing authenticated Android SMS Gate relay.

@@ -1,0 +1,15 @@
+; Include this dedicated context from your existing extensions.conf.
+; Do not expose it through a public SIP endpoint or inbound phone context.
+; The validated local worker originates Mobile/<configured-device>/<approved-number>
+; and enters this context only when Asterisk reports the called channel answered.
+[samarth-checkin]
+exten => _.,1,NoOp(Samarth consent-gated check-in)
+ same => n,Set(TIMEOUT(absolute)=240)
+ same => n,Set(AGIEXITONHANGUP=yes)
+ same => n,AGI(samarth_checkin.py,${EXTEN})
+ same => n,Hangup()
+
+; Unsolicited calls to the paired SIM are not a supported care intake channel.
+[samarth-mobile-inbound]
+exten => s,1,Hangup()
+exten => _.,1,Hangup()

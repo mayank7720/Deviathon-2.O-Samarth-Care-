@@ -1,0 +1,17 @@
+; The shipped adapter uses the local Asterisk control socket, not AMI.
+; Leave AMI disabled unless a separately reviewed local worker needs it.
+[general]
+enabled=no
+webenabled=no
+port=5038
+bindaddr=127.0.0.1
+
+; Optional local-only account. Generate its secret locally; never commit one.
+; Do not grant command, system, config or unrestricted write permissions.
+; Even originate is powerful: grant this only to the trusted local worker.
+;[samarth-local-worker]
+;secret=REPLACE_WITH_A_LOCALLY_GENERATED_SECRET
+;deny=0.0.0.0/0.0.0.0
+;permit=127.0.0.1/255.255.255.255
+;read=call
+;write=originate

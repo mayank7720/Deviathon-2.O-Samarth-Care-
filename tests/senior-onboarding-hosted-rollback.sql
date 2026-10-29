@@ -1,0 +1,23 @@
+begin;
+do $$declare a uuid;u uuid:=gen_random_uuid();r uuid:=gen_random_uuid();outcome jsonb;sid text;begin
+ select owner_user_id::uuid into a from public.care_workspaces where id='primary';
+ insert into auth.users(id,email,aud,role,email_confirmed_at,created_at,updated_at,raw_app_meta_data,raw_user_meta_data) values(u,'new-senior-'||u||'@example.invalid','authenticated','authenticated',now(),now(),now(),'{}','{}');
+ insert into private.care_account_admin_requests(id,actor_id,action,request_hash,result) values(r,a,'onboard',repeat('a',64),'{"claimed":true}');
+ perform set_config('request.jwt.claims','{"role":"service_role"}',true);
+ perform set_config('role','service_role',true);
+ outcome:=public.care_admin_onboard_senior(a,u,jsonb_build_object('email','new-senior-'||u||'@example.invalid','name','Fictional new senior','age',73,'city','Pune','language','Hindi','idempotencyKey',r),r);
+ sid:=outcome#>>'{senior,id}';
+ if sid!~'^S[0-9]{6}$' or not exists(select 1 from public.care_profiles where senior_id=sid and profile#>>'{dataProvenance,kind}'='recorded') then raise exception 'New care identity missing';end if;
+ if not exists(select 1 from public.care_memberships where user_id=u::text and role='senior' and senior_id=sid and scope_json::jsonb=jsonb_build_array(sid)) then raise exception 'Own identity login missing';end if;
+ if exists(select 1 from public.care_observations where senior_id=sid) or exists(select 1 from public.care_consents where senior_id=sid and family_allowed) then raise exception 'Invented observation or consent';end if;
+ if not exists(select 1 from public.care_daily_scores where senior_id=sid and payload->>'level'='unknown' and payload->>'score' is null) then raise exception 'Initial unknown priority missing';end if;
+ if public.care_admin_onboard_senior(a,u,'{}',r)<>outcome then raise exception 'Onboarding retry duplicated identity';end if;
+ perform set_config('role','none',true);
+ perform set_config('request.jwt.claims',jsonb_build_object('role','authenticated','sub',u,'iat',extract(epoch from now())::bigint)::text,true);
+ if not exists(select 1 from jsonb_array_elements(public.care_recorded_profiles())p where p->>'id'=sid) then raise exception 'Own cloud profile unavailable';end if;
+ perform set_config('request.jwt.claims',jsonb_build_object('role','authenticated','sub',(select id from auth.users where email='family@samarth.test'),'iat',extract(epoch from now())::bigint)::text,true);
+ if exists(select 1 from jsonb_array_elements(public.care_recorded_profiles())p where p->>'id'=sid) then raise exception 'Unrelated family saw new senior';end if;
+ begin perform public.care_admin_onboard_senior(a,u,'{}',gen_random_uuid());raise exception 'Member invoked onboarding';exception when insufficient_privilege then null;end;
+end $$;
+rollback;
+select 'PASS: new own senior identity, empty history, consent off, idempotent replay and scoped retrieval; all fixtures rolled back' as result;

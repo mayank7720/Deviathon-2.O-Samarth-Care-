@@ -1,0 +1,766 @@
+{
+  "name": "Samarth Care - evidence-locked weekly family report",
+  "nodes": [
+    {
+      "id": "signed-report-webhook",
+      "name": "Signed report webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "samarth-weekly-report",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "samarth-weekly-report-v1"
+    },
+    {
+      "id": "prepare-ingress",
+      "name": "Prepare ingress",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "const item=$input.first();\nif(!item.binary?.data||typeof this.helpers?.getBinaryDataBuffer!=='function')throw new Error('Raw-body webhook input and the n8n binary helper are required.');\nconst bytes=await this.helpers.getBinaryDataBuffer(0,'data');\nif(bytes.byteLength>131072)throw new Error('Integration payload is too large.');\nconst raw=Buffer.from(bytes).toString('utf8');\nconst h=item.json.headers||{},timestamp=String(h['x-samarth-timestamp']||''),nonce=String(h['x-samarth-nonce']||''),signature=String(h['x-samarth-signature']||'');\nif(!/^\\d{10}$/.test(timestamp)||!/^[A-Za-z0-9_-]{16,96}$/.test(nonce)||!/^[a-f0-9]{64}$/i.test(signature)||Math.abs(Date.now()-Number(timestamp)*1000)>300000)throw new Error('Invalid or expired integration signature.');\nreturn [{json:{raw,timestamp,nonce,signature,signedText:timestamp+'\\n'+nonce+'\\n'+raw}}];"
+      },
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "id": "authenticate-request",
+      "name": "Authenticate request",
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 2,
+      "parameters": {
+        "action": "hmac",
+        "type": "SHA256",
+        "binaryData": false,
+        "value": "={{ $json.signedText }}",
+        "dataPropertyName": "computedSignature",
+        "encoding": "hex"
+      },
+      "position": [
+        440,
+        0
+      ],
+      "credentials": {
+        "crypto": {
+          "id": "SELECT_SAMARTH_HMAC_CREDENTIAL",
+          "name": "Samarth Care HMAC - select encrypted credential"
+        }
+      }
+    },
+    {
+      "id": "verify-request",
+      "name": "Verify request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "const input=$input.first().json;\nlet difference=0;\nif(typeof input.computedSignature!=='string'||input.computedSignature.length!==input.signature.length)throw new Error('Invalid integration signature.');\nfor(let i=0;i<input.signature.length;i++)difference|=input.signature.toLowerCase().charCodeAt(i)^input.computedSignature.toLowerCase().charCodeAt(i);\nif(difference)throw new Error('Invalid integration signature.');\nconst envelope=JSON.parse(input.raw);\nif(envelope.version!==1||typeof envelope.jobId!=='string'||!/^[A-Za-z0-9_-]{16,96}$/.test(envelope.jobId))throw new Error('Invalid integration job.');\nreturn [{json:{...input,envelope}}];"
+      },
+      "position": [
+        660,
+        0
+      ]
+    },
+    {
+      "id": "claim-durable-report-job",
+      "name": "Claim durable report job",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $vars.SAMARTH_APP_ORIGIN + '/api/integrations/n8n/claim' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "content-type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-samarth-timestamp",
+              "value": "={{ $('Prepare ingress').first().json.timestamp }}"
+            },
+            {
+              "name": "x-samarth-nonce",
+              "value": "={{ $('Prepare ingress').first().json.nonce }}"
+            },
+            {
+              "name": "x-samarth-signature",
+              "value": "={{ $('Prepare ingress').first().json.signature }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $('Prepare ingress').first().json.raw }}",
+        "options": {
+          "timeout": 90000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "position": [
+        880,
+        0
+      ]
+    },
+    {
+      "id": "verify-durable-report-claim",
+      "name": "Verify durable report claim",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "const job=$input.first().json;\nif(job.claimed!==true||job.kind!=='weekly_report.request'||typeof job.jobId!=='string'||!/^[A-Za-z0-9_-]{16,96}$/.test(job.jobId)||!job.facts||!job.schema||!/^[a-f0-9]{64}$/.test(job.factsHash)||!['en','hi'].includes(job.language))throw new Error('The server did not durably claim this report job.');\nreturn [{json:job}];"
+      },
+      "position": [
+        1100,
+        0
+      ]
+    },
+    {
+      "id": "acknowledge-claimed-report-job",
+      "name": "Acknowledge claimed report job",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "parameters": {
+        "respondWith": "json",
+        "enableResponseOutput": false,
+        "responseBody": "={{ JSON.stringify({accepted:true,jobId:$json.jobId,status:'processing',generationCompleted:false,executionId:$execution.id}) }}",
+        "options": {
+          "responseCode": 202
+        }
+      },
+      "position": [
+        1320,
+        0
+      ]
+    },
+    {
+      "id": "prepare-model-request",
+      "name": "Prepare model request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "const job=$input.first().json;\nif(job.claimed!==true||job.kind!=='weekly_report.request'||!job.facts||!job.schema||!job.factsHash)throw new Error('The server did not claim a report job.');\nif(!['en','hi'].includes(job.language))throw new Error('Unsupported report language.');\nconst model=String($vars.SAMARTH_REPORT_MODEL||'').trim(),protocol=String($vars.SAMARTH_REPORT_PROTOCOL||'openai');\nif(!model||!['openai','ollama'].includes(protocol))throw new Error('Configure a report model and supported JSON protocol.');\nconst instruction='Choose a warm weekly report plan using only supplied fact IDs. Include coverage and every immediate-review cue. Preserve nextStep. Return only JSON matching the supplied schema; never add free text, numbers or diagnoses.';\nconst messages=[{role:'system',content:instruction},{role:'user',content:JSON.stringify({language:job.language,facts:job.facts,schema:job.schema})}];\nconst requestBody=protocol==='ollama'?{model,stream:false,messages,format:job.schema,options:{temperature:0.1}}:{model,temperature:0.1,messages,response_format:{type:'json_schema',json_schema:{name:'care_report_plan',strict:true,schema:job.schema}}};\nreturn [{json:{job,model,protocol,requestBody}}];"
+      },
+      "position": [
+        1540,
+        0
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "generate-report-plan",
+      "name": "Generate report plan",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $vars.SAMARTH_LLM_CHAT_URL }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.requestBody) }}",
+        "options": {
+          "timeout": 60000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "position": [
+        1760,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "SELECT_REPORT_MODEL_CREDENTIAL",
+          "name": "Report model HTTP authentication - select credential"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "validate-model-evidence",
+      "name": "Validate model evidence",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "const configured=$('Prepare model request').first().json,job=configured.job;\nconst response=$input.first().json;\nconst raw=response.choices?.[0]?.message?.content??response.message?.content;\nif(typeof raw!=='string'||raw.length>16000)throw new Error('The model did not return a bounded JSON plan.');\nconst plan=JSON.parse(raw),allowed=['version','language','opening','highlights','nextStep','closing'];\nif(!plan||Array.isArray(plan)||Object.keys(plan).some(k=>!allowed.includes(k))||plan.version!==1||plan.language!==job.language||!['warm','plain'].includes(plan.opening)||!['supportive','brief'].includes(plan.closing)||plan.nextStep!==job.facts.requiredAction)throw new Error('The model output failed report-plan validation.');\nif(!Array.isArray(plan.highlights)||!plan.highlights.length||plan.highlights.length>10)throw new Error('The model output has invalid highlights.');\nconst ids=[];\nfor(const h of plan.highlights){if(!h||Object.keys(h).some(k=>k!=='factId')||!job.facts.statements.some(f=>f.id===h.factId))throw new Error('The model invented a report statement.');ids.push(h.factId);}\nif(new Set(ids).size!==ids.length||!ids.includes('coverage'))throw new Error('The report omitted coverage or repeated evidence.');\nfor(const f of job.facts.statements.filter(f=>['cue_fall','cue_chest_pain','cue_breathlessness','sensor_possible_fall'].includes(f.id)))if(!ids.includes(f.id))throw new Error('The report omitted immediate-review evidence.');\nreturn [{json:{jobId:job.jobId,factsHash:job.factsHash,plan,model:configured.model}}];"
+      },
+      "position": [
+        1980,
+        0
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "fresh-callback-nonce",
+      "name": "Fresh callback nonce",
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 2,
+      "parameters": {
+        "action": "generate",
+        "encodingType": "uuid",
+        "dataPropertyName": "callbackNonce"
+      },
+      "position": [
+        2200,
+        0
+      ]
+    },
+    {
+      "id": "prepare-callback",
+      "name": "Prepare callback",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "const plan=$('Validate model evidence').first().json;\nconst nonce=$input.first().json.callbackNonce,timestamp=String(Math.floor(Date.now()/1000));\nif(typeof nonce!=='string'||nonce.length<16)throw new Error('A fresh callback nonce is required.');\nconst envelope={version:1,kind:'weekly_report.completed',jobId:plan.jobId,factsHash:plan.factsHash,plan:plan.plan,model:plan.model};\nconst raw=JSON.stringify(envelope);\nreturn [{json:{raw,timestamp,nonce,signedText:timestamp+'\\n'+nonce+'\\n'+raw,jobId:plan.jobId}}];"
+      },
+      "position": [
+        2420,
+        0
+      ]
+    },
+    {
+      "id": "sign-report-callback",
+      "name": "Sign report callback",
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 2,
+      "parameters": {
+        "action": "hmac",
+        "type": "SHA256",
+        "binaryData": false,
+        "value": "={{ $json.signedText }}",
+        "dataPropertyName": "callbackSignature",
+        "encoding": "hex"
+      },
+      "position": [
+        2640,
+        0
+      ],
+      "credentials": {
+        "crypto": {
+          "id": "SELECT_SAMARTH_HMAC_CREDENTIAL",
+          "name": "Samarth Care HMAC - select encrypted credential"
+        }
+      }
+    },
+    {
+      "id": "save-pending-review-report",
+      "name": "Save pending review report",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $vars.SAMARTH_APP_ORIGIN + '/api/integrations/n8n/callback' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "content-type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-samarth-timestamp",
+              "value": "={{ $('Prepare callback').first().json.timestamp }}"
+            },
+            {
+              "name": "x-samarth-nonce",
+              "value": "={{ $('Prepare callback').first().json.nonce }}"
+            },
+            {
+              "name": "x-samarth-signature",
+              "value": "={{ $json.callbackSignature }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $('Prepare callback').first().json.raw }}",
+        "options": {
+          "timeout": 90000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "position": [
+        2860,
+        0
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "classify-workflow-error",
+      "name": "Classify workflow_error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "return [{json:{failureCode:'workflow_error'}}];"
+      },
+      "position": [
+        1650,
+        360
+      ]
+    },
+    {
+      "id": "classify-model-error",
+      "name": "Classify model_error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "return [{json:{failureCode:'model_error'}}];"
+      },
+      "position": [
+        1885,
+        360
+      ]
+    },
+    {
+      "id": "classify-invalid-output",
+      "name": "Classify invalid_output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "return [{json:{failureCode:'invalid_output'}}];"
+      },
+      "position": [
+        2120,
+        360
+      ]
+    },
+    {
+      "id": "classify-callback-rejected",
+      "name": "Classify callback_rejected",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "return [{json:{failureCode:'callback_rejected'}}];"
+      },
+      "position": [
+        2355,
+        360
+      ]
+    },
+    {
+      "id": "fresh-failure-nonce",
+      "name": "Fresh failure nonce",
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 2,
+      "parameters": {
+        "action": "generate",
+        "encodingType": "uuid",
+        "dataPropertyName": "failureNonce"
+      },
+      "position": [
+        2530,
+        360
+      ]
+    },
+    {
+      "id": "prepare-failure-callback",
+      "name": "Prepare failure callback",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "const job=$('Verify durable report claim').first().json;\nconst input=$input.first().json,nonce=input.failureNonce,timestamp=String(Math.floor(Date.now()/1000));\nif(job.claimed!==true||typeof nonce!=='string'||nonce.length<16||!['model_error','invalid_output','workflow_error','callback_rejected'].includes(input.failureCode))throw new Error('A claimed job and bounded failure code are required.');\nconst raw=JSON.stringify({version:1,kind:'weekly_report.failed',jobId:job.jobId,factsHash:job.factsHash,failureCode:input.failureCode});\nreturn [{json:{raw,timestamp,nonce,signedText:timestamp+'\\n'+nonce+'\\n'+raw,jobId:job.jobId}}];"
+      },
+      "position": [
+        2750,
+        360
+      ]
+    },
+    {
+      "id": "sign-failure-callback",
+      "name": "Sign failure callback",
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 2,
+      "parameters": {
+        "action": "hmac",
+        "type": "SHA256",
+        "binaryData": false,
+        "value": "={{ $json.signedText }}",
+        "dataPropertyName": "callbackSignature",
+        "encoding": "hex"
+      },
+      "position": [
+        2970,
+        360
+      ],
+      "credentials": {
+        "crypto": {
+          "id": "SELECT_SAMARTH_HMAC_CREDENTIAL",
+          "name": "Samarth Care HMAC - select encrypted credential"
+        }
+      }
+    },
+    {
+      "id": "save-failed-report-job",
+      "name": "Save failed report job",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $vars.SAMARTH_APP_ORIGIN + '/api/integrations/n8n/callback' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "content-type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-samarth-timestamp",
+              "value": "={{ $('Prepare failure callback').first().json.timestamp }}"
+            },
+            {
+              "name": "x-samarth-nonce",
+              "value": "={{ $('Prepare failure callback').first().json.nonce }}"
+            },
+            {
+              "name": "x-samarth-signature",
+              "value": "={{ $json.callbackSignature }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $('Prepare failure callback').first().json.raw }}",
+        "options": {
+          "timeout": 90000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "position": [
+        3190,
+        360
+      ]
+    },
+    {
+      "id": "deployment-notes",
+      "name": "Deployment notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "parameters": {
+        "width": 680,
+        "height": 300,
+        "content": "## Configure before publishing\nSelect encrypted Crypto v2 HMAC and model HTTP credentials. Set SAMARTH_APP_ORIGIN, SAMARTH_LLM_CHAT_URL, SAMARTH_REPORT_MODEL, SAMARTH_REPORT_PROTOCOL (openai or ollama). This HTTP model node needs its own credential; inspect the actual workspace Gateway credits if choosing a supported native model node instead. After a one-time durable server claim, HTTP 202 means processing only. The connected path continues through the model and signed callback; only that callback creates a pending-review report. Model, validation and callback errors send signed enum-only failures. Jobs time out durably; ambiguous claimed timeouts require inspection. Explicit terminal-failure retries allocate one new job. Do not retry an accepted execution automatically. Saved execution data is disabled; do not pin health aggregates."
+      },
+      "position": [
+        0,
+        -370
+      ]
+    }
+  ],
+  "connections": {
+    "Signed report webhook": {
+      "main": [
+        [
+          {
+            "node": "Prepare ingress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare ingress": {
+      "main": [
+        [
+          {
+            "node": "Authenticate request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Authenticate request": {
+      "main": [
+        [
+          {
+            "node": "Verify request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify request": {
+      "main": [
+        [
+          {
+            "node": "Claim durable report job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claim durable report job": {
+      "main": [
+        [
+          {
+            "node": "Verify durable report claim",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify durable report claim": {
+      "main": [
+        [
+          {
+            "node": "Acknowledge claimed report job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Acknowledge claimed report job": {
+      "main": [
+        [
+          {
+            "node": "Prepare model request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare model request": {
+      "main": [
+        [
+          {
+            "node": "Generate report plan",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Classify workflow_error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate report plan": {
+      "main": [
+        [
+          {
+            "node": "Validate model evidence",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Classify model_error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate model evidence": {
+      "main": [
+        [
+          {
+            "node": "Fresh callback nonce",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Classify invalid_output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fresh callback nonce": {
+      "main": [
+        [
+          {
+            "node": "Prepare callback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare callback": {
+      "main": [
+        [
+          {
+            "node": "Sign report callback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sign report callback": {
+      "main": [
+        [
+          {
+            "node": "Save pending review report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify workflow_error": {
+      "main": [
+        [
+          {
+            "node": "Fresh failure nonce",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify model_error": {
+      "main": [
+        [
+          {
+            "node": "Fresh failure nonce",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify invalid_output": {
+      "main": [
+        [
+          {
+            "node": "Fresh failure nonce",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save pending review report": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Classify callback_rejected",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify callback_rejected": {
+      "main": [
+        [
+          {
+            "node": "Fresh failure nonce",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fresh failure nonce": {
+      "main": [
+        [
+          {
+            "node": "Prepare failure callback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare failure callback": {
+      "main": [
+        [
+          {
+            "node": "Sign failure callback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sign failure callback": {
+      "main": [
+        [
+          {
+            "node": "Save failed report job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "none",
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": false,
+    "saveExecutionProgress": false,
+    "executionTimeout": 180
+  },
+  "active": false,
+  "pinData": {},
+  "tags": []
+}

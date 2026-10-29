@@ -1,0 +1,10 @@
+import {writeFileSync} from 'node:fs';
+import {generateRealisticCohort,createRealisticEngine} from '../lib/realistic-cohort.mjs';
+import {auditCohort} from '../lib/data-quality.mjs';
+import {generateGroundedReport} from '../lib/grounded-reports.mjs';
+const date='2026-10-29',cohort=generateRealisticCohort({endDate:date}),engine=createRealisticEngine(cohort);
+const seniors=engine.rankSeniors(date).map(s=>({id:s.id,name:s.name,age:s.age,city:s.city,score:s.score,level:s.level,urgency:s.urgency,action:s.action,reasons:s.reasons,confidence:s.confidence,latest:s.latest,trend:s.trend}));
+const reports={};for(const senior of seniors.slice(0,12))reports[senior.id]=await generateGroundedReport({senior:engine.scoreSenior(senior.id,date),records:cohort.records.filter(r=>r.seniorId===senior.id),asOfDate:date,dataKind:'synthetic'});
+const quality=auditCohort(cohort);
+writeFileSync('public/showcase-data.json',JSON.stringify({date,synthetic:true,readOnly:true,provenance:cohort.metadata,quality,metrics:engine.metrics(),seniors,reports}));
+console.log('Built public read-only snapshot from the reference-informed synthetic cohort. No workspace records were read.');

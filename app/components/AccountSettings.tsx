@@ -1,0 +1,12 @@
+"use client";
+import {useState} from 'react';
+import {useRouter} from 'next/navigation';
+import {careApi} from './AccessPortal';
+import './account-settings.css';
+
+export default function AccountSettings({name,role}:{name:string;role:string}) {
+ const router=useRouter();
+ const [currentPassword,setCurrent]=useState(''),[newPassword,setNew]=useState(''),[confirm,setConfirm]=useState(''),[visible,setVisible]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[saved,setSaved]=useState('');
+ async function change(event:React.FormEvent){event.preventDefault();if(busy)return;setError('');if(newPassword!==confirm){setError('The new passwords do not match.');return;}setBusy(true);try{const result=await careApi('/auth/password','POST',{currentPassword,newPassword});setCurrent('');setNew('');setConfirm('');setSaved(result.warning||'Your password has changed. Sign in again with your new password.');}catch(error){setError(error instanceof Error?error.message:'Your password could not be changed.');}finally{setBusy(false);}}
+ return <><section className="page-intro"><div><span className="eyebrow">MY ACCOUNT</span><h1>Account &amp; security</h1><p>{name} · {role}</p></div></section><section className="panel password-settings"><h2>Change your password</h2><p>Use at least 12 characters. You’ll sign in again after saving.</p>{saved?<div role="status"><p>{saved}</p><button className="button primary" onClick={()=>router.replace('/')}>Return to sign in</button></div>:<form onSubmit={change}>{error&&<p className="extension-error" role="alert">{error}</p>}<label>Current password<input type={visible?'text':'password'} autoComplete="current-password" value={currentPassword} disabled={busy} onChange={e=>setCurrent(e.target.value)} minLength={8} maxLength={128} required/></label><label>New password<input type={visible?'text':'password'} autoComplete="new-password" value={newPassword} disabled={busy} onChange={e=>setNew(e.target.value)} minLength={12} maxLength={128} required/></label><label>Confirm new password<input type={visible?'text':'password'} autoComplete="new-password" value={confirm} disabled={busy} onChange={e=>setConfirm(e.target.value)} minLength={12} maxLength={128} required/></label><label className="password-visibility"><input type="checkbox" checked={visible} onChange={e=>setVisible(e.target.checked)}/> Show passwords</label><button className="button primary" disabled={busy}>{busy?'Saving…':'Save new password'}</button></form>}</section></>;
+}

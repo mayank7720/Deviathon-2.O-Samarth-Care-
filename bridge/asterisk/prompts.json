@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "hi": {
+    "consent": "नमस्ते। यह समर्थ केयर हैकाथॉन का स्वचालित कुशलता कॉल है। यह आपातकालीन सेवा या डॉक्टर की सलाह नहीं है। आपकी अनुमति से हम चार छोटे उत्तर रिकॉर्ड करेंगे और उनका लिखित रूप आपकी देखभाल टीम को देंगे। रिकॉर्डिंग और लिखित रूप के लिए सहमत हों तो 1 दबाएँ। मना करने के लिए 9 दबाएँ या कॉल काट दें।",
+    "q1": "आज आपकी तबीयत कैसी है? क्या कोई नया दर्द, चक्कर या गिरने की घटना हुई है? बीप के बाद बताएँ। जवाब पूरा हो तो हैश दबा सकते हैं।",
+    "q2": "आज आपकी तय दवाएँ ली गई हैं? अगर कोई खुराक छूटी है या दवा लेने में मदद चाहिए तो बताएँ।",
+    "q3": "आज खाना, पानी और नींद कैसे रहे हैं? क्या आपकी सामान्य दिनचर्या से कुछ बदला है?",
+    "q4": "क्या आप अकेलापन या उलझन महसूस कर रहे हैं, या अपनी देखभाल टीम से किसी मदद या बात करने की इच्छा है?",
+    "thanks": "धन्यवाद। आपके दर्ज उत्तर देखभाल टीम की समीक्षा के लिए रखे जाएँगे। यह कोई बीमारी का निदान नहीं है। तुरंत परेशानी हो तो अपने सामान्य आपातकालीन संपर्क से मदद लें।",
+    "declined": "ठीक है। कोई उत्तर रिकॉर्ड नहीं किया गया। आपकी अनुमति के बिना रिकॉर्डिंग नहीं होगी। धन्यवाद।"
+  },
+  "en": {
+    "consent": "Hello. This is the Samarth Care hackathon automated wellbeing call. This is not an emergency service or medical advice. With your permission, we will record four short answers and share their written transcript with your care team. Press 1 to agree to recording and transcription. Press 9 to decline, or hang up.",
+    "q1": "How are you feeling today? Have you had any new pain, dizziness, or a fall? Please answer after the beep. You may press hash when you finish.",
+    "q2": "Have you taken your scheduled medicines today? Please mention a missed dose or any help you need taking them.",
+    "q3": "How have your food, water, and sleep been today? Has anything changed from your usual routine?",
+    "q4": "Have you felt lonely or confused, or would you like help or a conversation with your care team?",
+    "thanks": "Thank you. Your recorded answers will be kept for care-team review. This is not a diagnosis. If you are in immediate distress, use your usual emergency support.",
+    "declined": "That is fine. No answer was recorded. We will not record without your permission. Thank you."
+  }
+}

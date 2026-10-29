@@ -1,0 +1,15 @@
+.git
+.env*
+.dev.vars*
+.vercel
+.local-tools
+.wrangler
+.sites-runtime
+.vinext
+.next
+dist
+node_modules
+outputs
+work
+coverage
+*.tsbuildinfo
