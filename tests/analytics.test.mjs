@@ -266,3 +266,106 @@ test('feedback model output is deterministic and excludes target labels from fea
   assert.deepEqual(first.weights, second.weights);
   assert.ok(!first.featureNames.some((feature) => /useful|disease|diagnos/iu.test(feature)));
 });
+
+test('partial medicine logs keep pending doses unknown instead of imputing missed outcomes', () => {
+  const rows = [{ seniorId: 'DEMO', date: day(27), medication: { prescribed: 3, doses: [
+    { name: 'Example A', status: 'taken' },
+    { name: 'Example B', status: 'pending' },
+    { name: 'Example C' },
+  ] } }];
+  const result = analyzeSenior(simpleSenior(), rows);
+  assert.equal(result.medication.adherence, 100);
+  assert.equal(result.medication.prescribedDoses, 1);
+  assert.equal(result.medication.scheduledDoses, 3);
+  assert.equal(result.medication.unresolvedDoses, 2);
+  assert.equal(result.medication.missedDoses, 0);
+  assert.equal(result.medication.missedDays, 0);
+  assert.match(result.summary.text, /2 scheduled dose outcomes remain unknown/);
+  assert.match(result.domains.find(domain => domain.id === 'medication').summary, /unknown/);
+});
+
+test('impossible medication totals and contradictory dose status are surfaced instead of clamped', () => {
+  const result = analyzeSenior(simpleSenior(), [{ seniorId: 'DEMO', date: day(27), medication: {
+    taken: 5, prescribed: 3,
+    doses: [{ name: 'Example A', status: 'missed', takenAt: '2026-10-27T08:00:00Z' }],
+  } }]);
+  assert.equal(result.medication.adherence, null);
+  assert.equal(result.medication.missedDoses, 0);
+  assert.equal(result.medication.unresolvedDoses, 3);
+  assert.ok(result.medication.invalidLogs > 0);
+  assert.ok(result.dataQuality.flags.some(flag => /Inconsistent medicine/.test(flag)));
+});
+
+test('all unresolved medicine outcomes leave adherence unknown', () => {
+  const result = analyzeSenior(simpleSenior(), [{ seniorId: 'DEMO', date: day(27), medication: {
+    prescribed: 2, doses: [{ status: 'pending' }, { status: 'pending' }],
+  } }]);
+  assert.equal(result.medication.adherence, null);
+  assert.equal(result.medication.observedDays, 0);
+  assert.equal(result.medication.missedDoses, 0);
+  assert.match(result.summary.text, /2 scheduled medicine dose outcomes remain unknown/);
+});
+
+test('numeric medicine snapshots cannot turn explicitly pending or unknown dose outcomes into misses', () => {
+  const result = analyzeSenior(simpleSenior(), [{ seniorId: 'DEMO', date: day(27), medication: {
+    prescribed: 2, taken: 0, doses: [{ status: 'pending' }, { status: 'unknown' }],
+  } }]);
+  assert.equal(result.medication.adherence, null);
+  assert.equal(result.medication.missedDoses, 0);
+  assert.equal(result.medication.unresolvedDoses, 2);
+  assert.ok(result.dataQuality.flags.some(flag => /outcomes remain unknown/.test(flag)));
+});
+
+test('mixed medicine outcomes use only explicit resolved dose statuses despite a daily total', () => {
+  const result = analyzeSenior(simpleSenior(), [{ seniorId: 'DEMO', date: day(27), medication: {
+    prescribed: 3, taken: 1, doses: [{ status: 'taken' }, { status: 'missed' }, { status: 'pending' }],
+  } }]);
+  assert.equal(result.medication.adherence, 50);
+  assert.equal(result.medication.prescribedDoses, 2);
+  assert.equal(result.medication.takenDoses, 1);
+  assert.equal(result.medication.missedDoses, 1);
+  assert.equal(result.medication.unresolvedDoses, 1);
+  assert.match(result.domains.find(domain => domain.id === 'medication').summary, /unknown/);
+});
+
+test('projection abstains on stale or disconnected scores instead of fitting arbitrarily old entries', () => {
+  const stale = [10, 11, 12, 13, 14, 15].map(index => ({ date: day(index), score: index }));
+  const result = forecastRisk(stale, { asOfDate: day(27) });
+  assert.deepEqual(result.points, []);
+  assert.match(result.abstentionReason, /stale/);
+  const disconnected = [14, 15, 16, 25, 26, 27].map(index => ({ date: day(index), score: index }));
+  assert.deepEqual(forecastRisk(disconnected, { asOfDate: day(27) }).points, []);
+});
+
+test('projection dates start after the requested analysis date, even with a recent missing day', () => {
+  const trend = [20, 21, 22, 23, 24, 25].map(index => ({ date: day(index), score: index }));
+  const result = forecastRisk(trend, { asOfDate: day(27) });
+  assert.equal(result.points[0].date, day(28));
+  assert.equal(result.points[0].score, 28);
+  assert.equal(result.daysSinceLastScore, 2);
+});
+
+test('evaluated browser motion does not bypass sustained-quiet rejection using raw impact and tilt', () => {
+  const result = analyzeSenior(simpleSenior(), [{ seniorId: 'DEMO', date: day(27), sensor: {
+    source: 'browser-motion', impactG: 3.5, postureChange: true,
+    fallDetected: false, detectionEvaluated: true, inactiveMinutes: 0,
+  } }]);
+  assert.equal(result.sensor.fallSuspected, false);
+});
+
+test('medicine lateness requires absolute scheduled and taken timestamps rather than assuming UTC', () => {
+  const result = analyzeSenior(simpleSenior(), [{ seniorId: 'DEMO', date: day(27), medication: { doses: [
+    { name: 'Clock-only', scheduledTime: '08:00', takenAt: '2026-10-27T11:00:00Z', status: 'taken' },
+    { name: 'Explicit zone', scheduledAt: '2026-10-27T08:00:00+05:30', takenAt: '2026-10-27T11:00:00+05:30', status: 'taken' },
+  ] } }]);
+  assert.equal(result.medication.lateDoses, 1);
+  assert.equal(result.medication.unresolvedTimingDoses, 1);
+});
+
+test('blood-pressure domain detects diastolic personal change even when systolic is unchanged', () => {
+  const rows = simpleRecords().map(row => ({ ...row, vitals: { ...row.vitals, systolic: 125, diastolic: 94 } }));
+  const pressure = analyzeSenior(simpleSenior(), rows).domains.find(domain => domain.id === 'blood-pressure');
+  assert.equal(pressure.level, 'high');
+  assert.match(pressure.summary, /moved away/);
+  assert.ok(pressure.evidence.some(entry => /diastolic reference 78/.test(entry)));
+});

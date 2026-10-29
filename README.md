@@ -2,6 +2,8 @@
 
 [Round 1 presentation](docs/round1/CodeBurner-DEVS09-Samarth-Care-Round1.pptx) · [Concept and technical brief](docs/Samarth-Care-Technical-Writeup.pdf) · [Five-minute demo script](docs/DEMO_SCRIPT.md)
 
+**Latest algorithm release:** [personal-risk-v2](docs/ALGORITHM_UPGRADE_2026_10_30.md) adds robust measured references, separate anomaly calibration, repeated-change detection, safer bilingual assertions and consistent medication uncertainty. It documents the measured gains and regressions on the unchanged synthetic benchmark; earlier slide/PDF figures are dated checkpoints.
+
 An early-warning and care-follow-up workspace that helps a coordinator decide which senior needs attention, why their signals changed, and who owns the next step. Built for the DEV_104 hackathon brief using fictional identities and synthetic health signals.
 
 The default data mode is **reference-informed**, with **200 seniors over 90 days** and a default replay date of **29 October 2026**. An administrator can replay the synthetic history or use today's date in India; live mode marks stale information rather than inventing observations. Risk scores route concerns to a human and do not diagnose conditions.

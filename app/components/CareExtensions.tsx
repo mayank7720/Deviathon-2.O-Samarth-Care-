@@ -430,9 +430,22 @@ export function AnalysisView({ data, notify, initialSenior }: Props) {
             </section>
             <section className="panel extension-panel">
               <div className="extension-panel-heading">
-                <h2>Models you can inspect</h2>
+                <h2>How this review was calculated</h2>
                 <p>Low-cost methods running within this application.</p>
               </div>
+              {!!analysis.personalChanges?.changes?.length && (
+                <div className="extension-note">
+                  <strong>Changes across the week</strong>
+                  <ul>
+                    {analysis.personalChanges.changes.map((change: {signal: string; label: string; deviatingDays: number; observedDays: number; direction: string; baseline: number; unit: string}) => (
+                      <li key={change.signal}>
+                        {change.label}: {change.deviatingDays} of {change.observedDays} logged days {change.direction} the personal reference of {change.baseline} {change.unit}.
+                      </li>
+                    ))}
+                  </ul>
+                  <p>{analysis.personalChanges.corroborated ? "Changes across readings and daily routines added to the review priority. Confirm the context with the senior." : "This repeated change is shown for review. Other signal groups have not corroborated it."}</p>
+                </div>
+              )}
               <div className="model-card-list">
                 {(Array.isArray(analysis.modelCards)
                   ? analysis.modelCards

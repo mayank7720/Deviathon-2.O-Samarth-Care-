@@ -1,0 +1,581 @@
+{
+  "schemaVersion": 1,
+  "modelVersion": "personal-risk-v2",
+  "modelSourceSha256": "ed8f28cefc629ef01887cd5a541758debdf9f42951cdd917a0fb1570bffff61d",
+  "metadata": {
+    "seed": 1042026,
+    "days": 90,
+    "startDate": "2026-07-30",
+    "endDate": "2026-10-27",
+    "seniorCount": 200,
+    "languageVariant": "standard",
+    "expectedObservations": 18000,
+    "actualObservations": 17226,
+    "dataType": "reference-informed synthetic simulation",
+    "synthetic": true,
+    "generator": "reference-informed-v1",
+    "scenarioFraction": 0.08,
+    "reference": {
+      "id": "reference-informed-v1",
+      "synthetic": true,
+      "title": "Reference-informed synthetic senior care scenarios",
+      "source": {
+        "title": "MITRE Synthea April 2020 sample CSV",
+        "url": "https://synthetichealth.github.io/synthea-sample-data/downloads/synthea_sample_data_csv_apr2020.zip",
+        "documentation": "https://synthetichealth.github.io/downloads.html",
+        "paper": "https://doi.org/10.1093/jamia/ocx079",
+        "archiveSha256": "4194b18c11eaedcf0d5d5dd448d8ac9661f14381e2ef9f109215dc42266cd38a",
+        "archiveBytes": 8982431,
+        "synthetic": true,
+        "allSampleIdentities": 1171,
+        "reuse": "Official download page states data is free from cost, privacy and security restrictions."
+      },
+      "basis": "Blood pressure, non-diabetes glucose and body-weight reference distributions come from per-person medians in the public MITRE Synthea sample at observation age 60-110. Every identity and daily signal below is newly simulated.",
+      "authoredAssumptions": [
+        "Eight percent of identities receive deliberately planted review scenarios for stress testing; this is not a prevalence estimate.",
+        "Daily serial correlation, measurement schedules, symptom wording, medication-taking, activity and sleep are authored assumptions.",
+        "The reference is synthetic US EHR data, not an Indian geriatric or longitudinal home-care outcomes cohort.",
+        "SpO2 and treatment-history subgroups are illustrative because compatible reference observations are unavailable."
+      ],
+      "validation": "Data-quality and synthetic identity-held-out checks; no patient-outcome validation or diagnostic probabilities."
+    },
+    "sourceCalibration": {
+      "systolic": {
+        "available": true,
+        "people": 296,
+        "observations": 3558,
+        "unit": "mm[Hg]",
+        "p10": 113.75,
+        "median": 119.5,
+        "p90": 127,
+        "minimum": 108,
+        "maximum": 190,
+        "aggregation": "One median per synthetic identity at observation age 60-110; distribution across identity medians."
+      },
+      "diastolic": {
+        "available": true,
+        "people": 296,
+        "observations": 3558,
+        "unit": "mm[Hg]",
+        "p10": 76,
+        "median": 80,
+        "p90": 83,
+        "minimum": 72,
+        "maximum": 109,
+        "aggregation": "One median per synthetic identity at observation age 60-110; distribution across identity medians."
+      },
+      "glucose": {
+        "available": true,
+        "people": 220,
+        "observations": 3419,
+        "unit": "mg/dL",
+        "p10": 74.75,
+        "median": 82.03,
+        "p90": 92.51,
+        "minimum": 66.1,
+        "maximum": 161.9,
+        "aggregation": "One median per synthetic identity at observation age 60-110; distribution across identity medians."
+      },
+      "weight": {
+        "available": true,
+        "people": 296,
+        "observations": 3243,
+        "unit": "kg",
+        "p10": 71.35,
+        "median": 82.47,
+        "p90": 95.7,
+        "minimum": 60,
+        "maximum": 129,
+        "aggregation": "One median per synthetic identity at observation age 60-110; distribution across identity medians."
+      },
+      "spo2": {
+        "available": false,
+        "reason": "No compatible observations in this reference archive."
+      }
+    },
+    "recordSchemaVersion": 2,
+    "incidentCount": 4,
+    "groundTruthCoverage": "partial-positive-scenarios-only",
+    "unlabelledDaysAreNotNegative": true
+  },
+  "evaluation": {
+    "from": "2026-08-29",
+    "to": "2026-10-27",
+    "identities": 50,
+    "heldOutRule": "Every fourth synthetic identity is excluded from fitting and calibration; evaluation uses days 31 onward.",
+    "baselineRule": "Each held-out senior may use their own first 30 days as a personal reference.",
+    "thresholds": [
+      {
+        "threshold": 30,
+        "evaluatedSeniorDays": 3000,
+        "scenarioDays": 80,
+        "coveredScenarioDays": 46,
+        "flaggedSeniorDays": 97,
+        "unlabelledFlaggedSeniorDays": 51,
+        "unknownSeniorDays": 19,
+        "dailyScenarioCoverage": 0.575,
+        "detectedCases": 4,
+        "totalCases": 4,
+        "caseCoverage": 1,
+        "meanDelayAfterOnsetDays": 3.75,
+        "meanDaysBeforeAuthoredEscalation": 6.25,
+        "flaggedDaysPer100SeniorDays": 3.233,
+        "unlabelledFlaggedDaysPer100SeniorDays": 1.7,
+        "cases": [
+          {
+            "seniorId": "S004",
+            "pattern": "multisignal",
+            "onsetDate": "2026-09-15",
+            "authoredEscalationDate": "2026-09-25",
+            "firstFlagDate": "2026-09-19",
+            "delayAfterOnsetDays": 4,
+            "daysBeforeAuthoredEscalation": 6
+          },
+          {
+            "seniorId": "S008",
+            "pattern": "medication",
+            "onsetDate": "2026-10-16",
+            "authoredEscalationDate": "2026-10-26",
+            "firstFlagDate": "2026-10-20",
+            "delayAfterOnsetDays": 4,
+            "daysBeforeAuthoredEscalation": 6
+          },
+          {
+            "seniorId": "S012",
+            "pattern": "appetite",
+            "onsetDate": "2026-09-15",
+            "authoredEscalationDate": "2026-09-25",
+            "firstFlagDate": "2026-09-19",
+            "delayAfterOnsetDays": 4,
+            "daysBeforeAuthoredEscalation": 6
+          },
+          {
+            "seniorId": "S016",
+            "pattern": "mobility",
+            "onsetDate": "2026-10-16",
+            "authoredEscalationDate": "2026-10-26",
+            "firstFlagDate": "2026-10-19",
+            "delayAfterOnsetDays": 3,
+            "daysBeforeAuthoredEscalation": 7
+          }
+        ],
+        "clinicalPerformance": {
+          "precision": null,
+          "recall": null,
+          "f1": null,
+          "specificity": null,
+          "reason": "Authored positive scenarios are partial; other days are unlabelled and no independent patient outcomes are available."
+        }
+      },
+      {
+        "threshold": 60,
+        "evaluatedSeniorDays": 3000,
+        "scenarioDays": 80,
+        "coveredScenarioDays": 17,
+        "flaggedSeniorDays": 66,
+        "unlabelledFlaggedSeniorDays": 49,
+        "unknownSeniorDays": 19,
+        "dailyScenarioCoverage": 0.213,
+        "detectedCases": 3,
+        "totalCases": 4,
+        "caseCoverage": 0.75,
+        "meanDelayAfterOnsetDays": 5.67,
+        "meanDaysBeforeAuthoredEscalation": 4.33,
+        "flaggedDaysPer100SeniorDays": 2.2,
+        "unlabelledFlaggedDaysPer100SeniorDays": 1.633,
+        "cases": [
+          {
+            "seniorId": "S004",
+            "pattern": "multisignal",
+            "onsetDate": "2026-09-15",
+            "authoredEscalationDate": "2026-09-25",
+            "firstFlagDate": "2026-09-21",
+            "delayAfterOnsetDays": 6,
+            "daysBeforeAuthoredEscalation": 4
+          },
+          {
+            "seniorId": "S008",
+            "pattern": "medication",
+            "onsetDate": "2026-10-16",
+            "authoredEscalationDate": "2026-10-26",
+            "firstFlagDate": "2026-10-24",
+            "delayAfterOnsetDays": 8,
+            "daysBeforeAuthoredEscalation": 2
+          },
+          {
+            "seniorId": "S012",
+            "pattern": "appetite",
+            "onsetDate": "2026-09-15",
+            "authoredEscalationDate": "2026-09-25",
+            "firstFlagDate": null,
+            "delayAfterOnsetDays": null,
+            "daysBeforeAuthoredEscalation": null
+          },
+          {
+            "seniorId": "S016",
+            "pattern": "mobility",
+            "onsetDate": "2026-10-16",
+            "authoredEscalationDate": "2026-10-26",
+            "firstFlagDate": "2026-10-19",
+            "delayAfterOnsetDays": 3,
+            "daysBeforeAuthoredEscalation": 7
+          }
+        ],
+        "clinicalPerformance": {
+          "precision": null,
+          "recall": null,
+          "f1": null,
+          "specificity": null,
+          "reason": "Authored positive scenarios are partial; other days are unlabelled and no independent patient outcomes are available."
+        }
+      }
+    ],
+    "immediateReviewSeniorDays": 52,
+    "anyHumanReviewSeniorDays": 97,
+    "anyHumanReviewDaysPer100SeniorDays": 3.233,
+    "interpretation": "Flagged senior-days measure potential review burden, not unique notifications or false alarms. Immediate-review rules are reported separately from numeric thresholds. Lead is relative to an authored escalation deadline, not an observed emergency."
+  },
+  "calibration": {
+    "fitIdentities": 120,
+    "calibrationIdentities": 30,
+    "evaluationIdentities": 50,
+    "samples": 411,
+    "quantile": 0.975,
+    "threshold": 0.5729393370255134,
+    "observedTailFraction": 0.024330900243309004,
+    "method": "Separate development identities, baseline windows only; descriptive calibration, not a medical false-positive rate."
+  },
+  "demographics": {
+    "development": {
+      "identities": 150,
+      "ageRange": [
+        62,
+        88
+      ],
+      "ageBands": {
+        "60-69": 44,
+        "70-79": 56,
+        "80+": 50
+      },
+      "gender": {
+        "Female": 100,
+        "Male": 50
+      },
+      "profileLanguage": {
+        "English": 50,
+        "Hindi": 100
+      },
+      "cities": {
+        "Delhi": 30,
+        "Pune": 30,
+        "Bengaluru": 30,
+        "Jaipur": 30,
+        "Mumbai": 30
+      }
+    },
+    "evaluation": {
+      "identities": 50,
+      "ageRange": [
+        62,
+        88
+      ],
+      "ageBands": {
+        "80+": 15,
+        "60-69": 16,
+        "70-79": 19
+      },
+      "gender": {
+        "Male": 50
+      },
+      "profileLanguage": {
+        "English": 17,
+        "Hindi": 33
+      },
+      "cities": {
+        "Mumbai": 10,
+        "Bengaluru": 10,
+        "Pune": 10,
+        "Delhi": 10,
+        "Jaipur": 10
+      }
+    },
+    "warnings": [
+      "Evaluation identities contain no Female profiles; results do not establish generalisation across genders."
+    ]
+  },
+  "ablation": {
+    "comparison": "Same cohort, split, dates, thresholds, NLP and rules; only the anomaly contribution is disabled.",
+    "rulesOnly": {
+      "precision": null,
+      "recall": 0.138,
+      "f1": null,
+      "meanLeadDays": 4.5,
+      "meanOnsetDetectionDelayDays": 5.5,
+      "detectedCases": 2,
+      "totalCases": 4
+    },
+    "rulesPlusModel": {
+      "precision": null,
+      "recall": 0.213,
+      "f1": null,
+      "meanLeadDays": 4.3,
+      "meanOnsetDetectionDelayDays": 5.7,
+      "detectedCases": 3,
+      "totalCases": 4
+    }
+  },
+  "quality": {
+    "schemaVersion": 1,
+    "passed": true,
+    "hardErrors": 0,
+    "counts": {
+      "duplicateSeniorDays": 0,
+      "invalidDates": 0,
+      "unknownSenior": 0,
+      "outOfRangeValues": 0,
+      "pressureOrder": 0,
+      "invalidMedicationCounts": 0,
+      "doseLogMismatch": 0,
+      "contradictoryMedicineNotes": 0,
+      "largeWeightJumps": 0,
+      "missingProvenance": 0
+    },
+    "issueExamples": [],
+    "seniorCount": 200,
+    "observations": 17226,
+    "expectedSeniorDays": 18000,
+    "wholeCheckinMissingRate": 0.043,
+    "missingness": {
+      "systolic": {
+        "present": 10024,
+        "missing": 7202,
+        "missingRate": 0.418
+      },
+      "diastolic": {
+        "present": 9988,
+        "missing": 7238,
+        "missingRate": 0.42
+      },
+      "glucose": {
+        "present": 5937,
+        "missing": 11289,
+        "missingRate": 0.655
+      },
+      "spo2": {
+        "present": 8423,
+        "missing": 8803,
+        "missingRate": 0.511
+      },
+      "weight": {
+        "present": 4369,
+        "missing": 12857,
+        "missingRate": 0.746
+      },
+      "activity": {
+        "present": 16155,
+        "missing": 1071,
+        "missingRate": 0.062
+      },
+      "sleep": {
+        "present": 15989,
+        "missing": 1237,
+        "missingRate": 0.072
+      },
+      "medication": {
+        "present": 15968,
+        "missing": 1258,
+        "missingRate": 0.073
+      },
+      "note": {
+        "present": 5918,
+        "missing": 11308,
+        "missingRate": 0.656
+      }
+    },
+    "temporal": {
+      "meanWithinPersonLagOneSystolicCorrelation": 0.654,
+      "meanWithinPersonLagOneWeightCorrelation": null,
+      "maximumWeightChangeKgPerDay": 0.2,
+      "p95WeightChangeKgPerDay": 0.1
+    },
+    "source": {
+      "kind": "reference-informed synthetic simulation",
+      "synthetic": true,
+      "generator": "reference-informed-v1",
+      "referenceSha256": "4194b18c11eaedcf0d5d5dd448d8ac9661f14381e2ef9f109215dc42266cd38a"
+    },
+    "interpretation": "Passing structural and consistency checks does not validate physiological realism, representativeness, risk thresholds or clinical outcomes. Broad bounds are input plausibility checks, not reference ranges or treatment advice."
+  },
+  "clinicalPerformance": {
+    "precision": null,
+    "recall": null,
+    "f1": null,
+    "specificity": null,
+    "reason": "Authored positive scenarios are partial; other days are unlabelled and no independent patient outcomes are available."
+  },
+  "reuse": {
+    "existingRealisticMetrics": true,
+    "robustnessRuns": [
+      {
+        "seed": 1042026,
+        "observations": 17226,
+        "scenarioDailyCoverage": 0.213,
+        "detectedCases": 3,
+        "totalCases": 4,
+        "unlabelledHighSeniorDays": 49,
+        "meanOnsetDetectionDelayDays": 5.7,
+        "meanLeadDays": 4.3,
+        "clinicalPrecision": null,
+        "clinicalRecall": null,
+        "reviewDailyScenarioCoverage": 0.575,
+        "reviewDetectedCases": 4,
+        "reviewTotalCases": 4,
+        "reviewMeanDelayAfterOnsetDays": 3.75
+      },
+      {
+        "seed": 1042027,
+        "observations": 17176,
+        "scenarioDailyCoverage": 0.338,
+        "detectedCases": 4,
+        "totalCases": 4,
+        "unlabelledHighSeniorDays": 62,
+        "meanOnsetDetectionDelayDays": 6.3,
+        "meanLeadDays": 3.8,
+        "clinicalPrecision": null,
+        "clinicalRecall": null,
+        "reviewDailyScenarioCoverage": 0.663,
+        "reviewDetectedCases": 4,
+        "reviewTotalCases": 4,
+        "reviewMeanDelayAfterOnsetDays": 3.75
+      },
+      {
+        "seed": 1042028,
+        "observations": 17209,
+        "scenarioDailyCoverage": 0.363,
+        "detectedCases": 4,
+        "totalCases": 4,
+        "unlabelledHighSeniorDays": 62,
+        "meanOnsetDetectionDelayDays": 6.8,
+        "meanLeadDays": 3.3,
+        "clinicalPrecision": null,
+        "clinicalRecall": null,
+        "reviewDailyScenarioCoverage": 0.688,
+        "reviewDetectedCases": 4,
+        "reviewTotalCases": 4,
+        "reviewMeanDelayAfterOnsetDays": 3.75
+      }
+    ]
+  },
+  "limitations": [
+    "Synthetic authored scenarios are correlated and small; no patient-level diagnostic performance is established.",
+    "Calibration uses development baseline distributions only and is not a medical false-positive rate.",
+    "Scenario daily coverage, case coverage, review burden and delay answer different questions; unlabelled flags are not labelled false positives.",
+    "Before/after comparisons are development evidence, not a fresh independent validation set; do not tune parameters against the held-out results.",
+    "Evaluation identities contain no Female profiles; results do not establish generalisation across genders."
+  ],
+  "comparison": {
+    "beforeModelVersion": "unversioned earlier checkpoint",
+    "sameSyntheticCohort": true,
+    "thresholdsUnchanged": true,
+    "before": [
+      {
+        "threshold": 30,
+        "dailyScenarioCoverage": 0.6,
+        "detectedCases": 4,
+        "totalCases": 4,
+        "meanDelayAfterOnsetDays": 3.75,
+        "flaggedDaysPer100SeniorDays": null
+      },
+      {
+        "threshold": 60,
+        "dailyScenarioCoverage": 0.2,
+        "detectedCases": 3,
+        "totalCases": 4,
+        "meanDelayAfterOnsetDays": 6,
+        "flaggedDaysPer100SeniorDays": 2.167
+      }
+    ],
+    "beforeRobustness": [
+      {
+        "seed": 1042026,
+        "observations": 17226,
+        "scenarioDailyCoverage": 0.2,
+        "detectedCases": 3,
+        "totalCases": 4,
+        "unlabelledHighSeniorDays": 49,
+        "meanOnsetDetectionDelayDays": 6,
+        "meanLeadDays": 4,
+        "clinicalPrecision": null,
+        "clinicalRecall": null
+      },
+      {
+        "seed": 1042027,
+        "observations": 17176,
+        "scenarioDailyCoverage": 0.3,
+        "detectedCases": 4,
+        "totalCases": 4,
+        "unlabelledHighSeniorDays": 62,
+        "meanOnsetDetectionDelayDays": 6.3,
+        "meanLeadDays": 3.8,
+        "clinicalPrecision": null,
+        "clinicalRecall": null
+      },
+      {
+        "seed": 1042028,
+        "observations": 17209,
+        "scenarioDailyCoverage": 0.313,
+        "detectedCases": 4,
+        "totalCases": 4,
+        "unlabelledHighSeniorDays": 62,
+        "meanOnsetDetectionDelayDays": 6.8,
+        "meanLeadDays": 3.3,
+        "clinicalPrecision": null,
+        "clinicalRecall": null
+      }
+    ],
+    "after": [
+      {
+        "threshold": 30,
+        "evaluatedSeniorDays": 3000,
+        "scenarioDays": 80,
+        "coveredScenarioDays": 46,
+        "flaggedSeniorDays": 97,
+        "unlabelledFlaggedSeniorDays": 51,
+        "unknownSeniorDays": 19,
+        "dailyScenarioCoverage": 0.575,
+        "detectedCases": 4,
+        "totalCases": 4,
+        "caseCoverage": 1,
+        "meanDelayAfterOnsetDays": 3.75,
+        "meanDaysBeforeAuthoredEscalation": 6.25,
+        "flaggedDaysPer100SeniorDays": 3.233,
+        "unlabelledFlaggedDaysPer100SeniorDays": 1.7
+      },
+      {
+        "threshold": 60,
+        "evaluatedSeniorDays": 3000,
+        "scenarioDays": 80,
+        "coveredScenarioDays": 17,
+        "flaggedSeniorDays": 66,
+        "unlabelledFlaggedSeniorDays": 49,
+        "unknownSeniorDays": 19,
+        "dailyScenarioCoverage": 0.213,
+        "detectedCases": 3,
+        "totalCases": 4,
+        "caseCoverage": 0.75,
+        "meanDelayAfterOnsetDays": 5.67,
+        "meanDaysBeforeAuthoredEscalation": 4.33,
+        "flaggedDaysPer100SeniorDays": 2.2,
+        "unlabelledFlaggedDaysPer100SeniorDays": 1.633
+      }
+    ],
+    "baselineReviewBurdenNote": "The earlier report did not retain total threshold-30 flagged days; its review-burden field stays null.",
+    "clinicalPerformance": {
+      "precision": null,
+      "recall": null,
+      "f1": null,
+      "specificity": null,
+      "reason": "Authored positive scenarios are partial; other days are unlabelled and no independent patient outcomes are available."
+    }
+  }
+}
