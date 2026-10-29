@@ -119,3 +119,23 @@ test('retrospective uncertainty and Hindi recent falls request verification rath
   }
   for(const text of ['If a fall occurs, call the team.','She might fall without a handrail.','History of a fall last year.'])assert.deepEqual(cues(text),[],text);
 });
+
+test('additional natural urgent wording keeps paired denials and other-person reports distinct',()=>{
+  for(const [text,cue] of [
+    ['I feel pressure in my chest now.','chest_pain'],['सीने में जकड़न हो रही है।','chest_pain'],
+    ['I am having trouble catching my breath.','breathlessness'],['सांस नहीं ले पा रही हूँ।','breathlessness'],
+    ['कल मैं गिरा था।','fall'],['कल मैं गिरी थी।','fall'],
+  ]){
+    assert.ok(cues(text).includes(cue),text);
+    assert.equal(classifyTriage({score:0,level:'low'},{note:text}).urgency,'immediate',text);
+  }
+  for(const text of ['No pressure in my chest.','My daughter has pressure in her chest.','No trouble catching my breath.','मेरी बेटी कल गिरी थी।','If you feel pressure in your chest, call for help.'])assert.deepEqual(cues(text),[],text);
+});
+test('memory, eating and missed-dose paraphrases are assertion aware',()=>{
+  for(const [text,cue] of [
+    ['Father could not remember where he was.','confusion'],['मुझे समझ नहीं आ रहा मैं कहाँ हूँ।','confusion'],
+    ["I haven't been eating for two days.",'low_appetite'],['भूख लगती नहीं है।','low_appetite'],
+    ['Missed a scheduled medicine dose.','missed_medication'],['दवा की एक या अधिक खुराक नहीं ली।','missed_medication'],['Dawai ki dose nahi li.','missed_medication'],
+  ])assert.ok(cues(text).includes(cue),text);
+  for(const text of ['Na dard hai na uljhan.','भूख नहीं कम हुई है।','I did not miss a scheduled medicine dose.','My daughter could not remember where she was.'])assert.deepEqual(cues(text),[],text);
+});

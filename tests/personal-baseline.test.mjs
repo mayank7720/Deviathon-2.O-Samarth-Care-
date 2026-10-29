@@ -97,4 +97,10 @@ test('calibration excludes evaluation identities and model revisions invalidate 
   assert.ok(calibration.samples>=30);assert.ok(calibration.threshold>0&&calibration.threshold<1);
   assert.ok(calibration.observedTailFraction<=.025);
   assert.ok(careModel({}).dataRevision.includes(MODEL_INFO.version));
+  const app=careModel({SAMARTH_DATA_MODE:'reference-informed'});
+  assert.equal(app.engine.evaluationSplit.strategy,'stratified-v1');
+  assert.ok(app.dataRevision.includes('stratified-v1'));
+  const legacy=careModel({SAMARTH_DATA_MODE:'reference-informed',SAMARTH_MODEL_SPLIT:'legacy-modulo'});
+  assert.equal(legacy.engine.evaluationSplit.strategy,'legacy-modulo');
+  assert.notEqual(app.dataRevision,legacy.dataRevision);
 });

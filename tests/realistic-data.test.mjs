@@ -99,3 +99,24 @@ test('alternate seed/calendar/size remain deterministic and do not copy the refe
   assert.deepEqual(alternate.records.map(r=>r.vitals),one.records.map(r=>r.vitals));
   assert.ok(alternate.records.some((r,i)=>r.note!==one.records[i].note));
 });
+test('representative evaluation uses the actual identity plan rather than legacy annotation split tags',()=>{
+  const engine=createRealisticEngine(cohort,{splitStrategy:'stratified-v1'}),metrics=engine.metrics();
+  const evaluated=new Set(engine.evaluationSplit.evaluationIds);
+  const episodes=cohort.groundTruth.filter(episode=>evaluated.has(episode.seniorId));
+  assert.equal(metrics.totalCases,episodes.length);
+  assert.equal(metrics.scenarioReviewCoverage.totalCases,episodes.length);
+  assert.deepEqual(metrics.scenarioReviewCoverage.cases.map(value=>value.seniorId).sort(),episodes.map(value=>value.seniorId).sort());
+  assert.equal(metrics.model.calibration.splitStrategy,'stratified-v1');
+  assert.equal(metrics.precision,null);
+  assert.ok(metrics.ablation.rulesOnly.recall<=metrics.ablation.rulesPlusModel.recall);
+});
+test('stratified forest fitting is invariant to profile input order and outcome labels',()=>{
+  const sample=generateRealisticCohort({seniorCount:40,days:60}),first=createRealisticEngine(sample,{splitStrategy:'stratified-v1'});
+  const reordered=createRealisticEngine({...sample,seniors:[...sample.seniors].reverse(),groundTruth:[]},{splitStrategy:'stratified-v1'});
+  assert.deepEqual(first.evaluationSplit,reordered.evaluationSplit);
+  const date=sample.metadata.endDate;
+  for(const id of ['S001','S020','S039']){
+    assert.equal(first.scoreSenior(id,date).anomalyScore,reordered.scoreSenior(id,date).anomalyScore);
+    assert.equal(first.scoreSenior(id,date).score,reordered.scoreSenior(id,date).score);
+  }
+});

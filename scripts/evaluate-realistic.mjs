@@ -8,11 +8,11 @@ const flags=new Set(process.argv.slice(2));
 if([...flags].some(flag=>!['--metrics-only','--help'].includes(flag)))throw new Error('Use --metrics-only or --help.');
 if(flags.has('--help'))console.log('node scripts/evaluate-realistic.mjs [--metrics-only]');
 else {
-  const cohort=generateRealisticCohort(),quality=auditCohort(cohort),engine=createRealisticEngine(cohort);
+  const cohort=generateRealisticCohort(),quality=auditCohort(cohort),engine=createRealisticEngine(cohort,{splitStrategy:'legacy-modulo'});
   const runs=[];
   for(const seed of [1042026,1042027,1042028]){
     const sample=seed===cohort.metadata.seed?cohort:generateRealisticCohort({seed});
-    const m=(seed===cohort.metadata.seed?engine:createRealisticEngine(sample)).metrics();
+    const m=(seed===cohort.metadata.seed?engine:createRealisticEngine(sample,{splitStrategy:'legacy-modulo'})).metrics();
     runs.push({seed,observations:sample.records.length,scenarioDailyCoverage:m.recall,detectedCases:m.detectedCases,totalCases:m.totalCases,unlabelledHighSeniorDays:m.unlabelledHighSeniorDays,meanOnsetDetectionDelayDays:m.meanOnsetDetectionDelayDays,meanLeadDays:m.meanLeadDays,clinicalPrecision:null,clinicalRecall:null});
   }
   const report={metadata:cohort.metadata,quality,metrics:engine.metrics(),robustness:{runs,limitations:'Three independently seeded synthetic scenarios; not independent patient validation. Parameters and templates remain authored in this repository.'}};

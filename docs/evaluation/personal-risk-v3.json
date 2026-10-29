@@ -1,0 +1,3301 @@
+{
+  "schemaVersion": 1,
+  "modelVersion": "personal-risk-v3",
+  "modelSourceSha256": "21eb262d378dfa069759e20798d4ecc993972ac4cd8ebccac71b66742473c753",
+  "purpose": "Compare identical current algorithms across the legacy and profile-stratified identity splits. This is not an old-model/new-model accuracy comparison.",
+  "policy": {
+    "splitSeed": 104,
+    "cohortSeeds": [
+      1042026,
+      1042027,
+      1042028
+    ],
+    "thresholds": [
+      30,
+      60
+    ],
+    "labelUse": "Labels are read only after split assignment and scoring; no model or split seed search.",
+    "profileStrata": [
+      "gender",
+      "age band",
+      "recorded diabetes history"
+    ]
+  },
+  "runs": [
+    {
+      "strategy": "legacy-modulo",
+      "splitSeed": 104,
+      "cohortSeed": 1042026,
+      "split": {
+        "strategy": "legacy-modulo",
+        "seed": 104,
+        "fitIds": [
+          "S001",
+          "S003",
+          "S005",
+          "S006",
+          "S009",
+          "S010",
+          "S011",
+          "S013",
+          "S014",
+          "S015",
+          "S018",
+          "S021",
+          "S023",
+          "S026",
+          "S027",
+          "S029",
+          "S030",
+          "S031",
+          "S033",
+          "S035",
+          "S037",
+          "S038",
+          "S041",
+          "S042",
+          "S045",
+          "S047",
+          "S050",
+          "S051",
+          "S053",
+          "S054",
+          "S057",
+          "S058",
+          "S059",
+          "S061",
+          "S062",
+          "S063",
+          "S065",
+          "S066",
+          "S067",
+          "S070",
+          "S071",
+          "S073",
+          "S074",
+          "S077",
+          "S079",
+          "S081",
+          "S082",
+          "S083",
+          "S086",
+          "S087",
+          "S089",
+          "S090",
+          "S093",
+          "S094",
+          "S095",
+          "S097",
+          "S098",
+          "S099",
+          "S101",
+          "S102",
+          "S103",
+          "S105",
+          "S106",
+          "S107",
+          "S109",
+          "S110",
+          "S113",
+          "S114",
+          "S115",
+          "S117",
+          "S118",
+          "S119",
+          "S121",
+          "S122",
+          "S125",
+          "S127",
+          "S129",
+          "S130",
+          "S131",
+          "S134",
+          "S135",
+          "S137",
+          "S138",
+          "S139",
+          "S142",
+          "S143",
+          "S145",
+          "S147",
+          "S149",
+          "S151",
+          "S153",
+          "S154",
+          "S155",
+          "S157",
+          "S158",
+          "S159",
+          "S162",
+          "S163",
+          "S165",
+          "S166",
+          "S167",
+          "S169",
+          "S170",
+          "S171",
+          "S173",
+          "S174",
+          "S175",
+          "S178",
+          "S181",
+          "S183",
+          "S186",
+          "S187",
+          "S189",
+          "S190",
+          "S191",
+          "S193",
+          "S194",
+          "S195",
+          "S198",
+          "S199"
+        ],
+        "calibrationIds": [
+          "S002",
+          "S007",
+          "S017",
+          "S019",
+          "S022",
+          "S025",
+          "S034",
+          "S039",
+          "S043",
+          "S046",
+          "S049",
+          "S055",
+          "S069",
+          "S075",
+          "S078",
+          "S085",
+          "S091",
+          "S111",
+          "S123",
+          "S126",
+          "S133",
+          "S141",
+          "S146",
+          "S150",
+          "S161",
+          "S177",
+          "S179",
+          "S182",
+          "S185",
+          "S197"
+        ],
+        "evaluationIds": [
+          "S004",
+          "S008",
+          "S012",
+          "S016",
+          "S020",
+          "S024",
+          "S028",
+          "S032",
+          "S036",
+          "S040",
+          "S044",
+          "S048",
+          "S052",
+          "S056",
+          "S060",
+          "S064",
+          "S068",
+          "S072",
+          "S076",
+          "S080",
+          "S084",
+          "S088",
+          "S092",
+          "S096",
+          "S100",
+          "S104",
+          "S108",
+          "S112",
+          "S116",
+          "S120",
+          "S124",
+          "S128",
+          "S132",
+          "S136",
+          "S140",
+          "S144",
+          "S148",
+          "S152",
+          "S156",
+          "S160",
+          "S164",
+          "S168",
+          "S172",
+          "S176",
+          "S180",
+          "S184",
+          "S188",
+          "S192",
+          "S196",
+          "S200"
+        ],
+        "strata": [
+          {
+            "key": "female|60-69|diabetes-history",
+            "total": 3,
+            "fit": 2,
+            "calibration": 1,
+            "evaluation": 0
+          },
+          {
+            "key": "female|60-69|no-diabetes-history",
+            "total": 29,
+            "fit": 24,
+            "calibration": 5,
+            "evaluation": 0
+          },
+          {
+            "key": "female|70-79|diabetes-history",
+            "total": 4,
+            "fit": 2,
+            "calibration": 2,
+            "evaluation": 0
+          },
+          {
+            "key": "female|70-79|no-diabetes-history",
+            "total": 32,
+            "fit": 25,
+            "calibration": 7,
+            "evaluation": 0
+          },
+          {
+            "key": "female|80-plus|diabetes-history",
+            "total": 3,
+            "fit": 3,
+            "calibration": 0,
+            "evaluation": 0
+          },
+          {
+            "key": "female|80-plus|no-diabetes-history",
+            "total": 29,
+            "fit": 23,
+            "calibration": 6,
+            "evaluation": 0
+          },
+          {
+            "key": "male|60-69|diabetes-history",
+            "total": 14,
+            "fit": 11,
+            "calibration": 1,
+            "evaluation": 2
+          },
+          {
+            "key": "male|60-69|no-diabetes-history",
+            "total": 14,
+            "fit": 0,
+            "calibration": 0,
+            "evaluation": 14
+          },
+          {
+            "key": "male|70-79|diabetes-history",
+            "total": 21,
+            "fit": 15,
+            "calibration": 5,
+            "evaluation": 1
+          },
+          {
+            "key": "male|70-79|no-diabetes-history",
+            "total": 18,
+            "fit": 0,
+            "calibration": 0,
+            "evaluation": 18
+          },
+          {
+            "key": "male|80-plus|diabetes-history",
+            "total": 20,
+            "fit": 15,
+            "calibration": 3,
+            "evaluation": 2
+          },
+          {
+            "key": "male|80-plus|no-diabetes-history",
+            "total": 13,
+            "fit": 0,
+            "calibration": 0,
+            "evaluation": 13
+          }
+        ]
+      },
+      "profiles": {
+        "fit": {
+          "identities": 120,
+          "gender": {
+            "Female": 79,
+            "Male": 41
+          },
+          "ageBands": {
+            "60-69": 37,
+            "70-79": 42,
+            "80+": 41
+          },
+          "diabetesHistory": 48
+        },
+        "calibration": {
+          "identities": 30,
+          "gender": {
+            "Male": 9,
+            "Female": 21
+          },
+          "ageBands": {
+            "60-69": 7,
+            "70-79": 14,
+            "80+": 9
+          },
+          "diabetesHistory": 12
+        },
+        "evaluation": {
+          "identities": 50,
+          "gender": {
+            "Male": 50
+          },
+          "ageBands": {
+            "80+": 15,
+            "60-69": 16,
+            "70-79": 19
+          },
+          "diabetesHistory": 5
+        }
+      },
+      "calibration": {
+        "fitIdentities": 120,
+        "calibrationIdentities": 30,
+        "evaluationIdentities": 50,
+        "splitStrategy": "legacy-modulo",
+        "splitSeed": 104,
+        "samples": 411,
+        "quantile": 0.975,
+        "threshold": 0.5885952040386367,
+        "observedTailFraction": 0.024330900243309004,
+        "method": "Separate development identities, baseline windows only; descriptive calibration, not a medical false-positive rate."
+      },
+      "thresholds": [
+        {
+          "threshold": 30,
+          "seniorDays": 3000,
+          "flags": 109,
+          "unlabelledFlags": 58,
+          "unknown": 19,
+          "annotatedDays": 80,
+          "coveredDays": 51,
+          "cases": [
+            {
+              "seniorId": "S004",
+              "pattern": "multisignal",
+              "onsetDate": "2026-09-15",
+              "firstFlagDate": "2026-09-19",
+              "delayAfterOnsetDays": 4
+            },
+            {
+              "seniorId": "S008",
+              "pattern": "medication",
+              "onsetDate": "2026-10-16",
+              "firstFlagDate": "2026-10-19",
+              "delayAfterOnsetDays": 3
+            },
+            {
+              "seniorId": "S012",
+              "pattern": "appetite",
+              "onsetDate": "2026-09-15",
+              "firstFlagDate": "2026-09-18",
+              "delayAfterOnsetDays": 3
+            },
+            {
+              "seniorId": "S016",
+              "pattern": "mobility",
+              "onsetDate": "2026-10-16",
+              "firstFlagDate": "2026-10-19",
+              "delayAfterOnsetDays": 3
+            }
+          ],
+          "detectedCases": 4,
+          "totalCases": 4,
+          "dailyScenarioCoverage": 0.638,
+          "flaggedDaysPer100SeniorDays": 3.633,
+          "meanDelayAfterOnsetDays": 3.25
+        },
+        {
+          "threshold": 60,
+          "seniorDays": 3000,
+          "flags": 71,
+          "unlabelledFlags": 49,
+          "unknown": 19,
+          "annotatedDays": 80,
+          "coveredDays": 22,
+          "cases": [
+            {
+              "seniorId": "S004",
+              "pattern": "multisignal",
+              "onsetDate": "2026-09-15",
+              "firstFlagDate": "2026-09-21",
+              "delayAfterOnsetDays": 6
+            },
+            {
+              "seniorId": "S008",
+              "pattern": "medication",
+              "onsetDate": "2026-10-16",
+              "firstFlagDate": "2026-10-24",
+              "delayAfterOnsetDays": 8
+            },
+            {
+              "seniorId": "S012",
+              "pattern": "appetite",
+              "onsetDate": "2026-09-15",
+              "firstFlagDate": "2026-09-30",
+              "delayAfterOnsetDays": 15
+            },
+            {
+              "seniorId": "S016",
+              "pattern": "mobility",
+              "onsetDate": "2026-10-16",
+              "firstFlagDate": "2026-10-19",
+              "delayAfterOnsetDays": 3
+            }
+          ],
+          "detectedCases": 4,
+          "totalCases": 4,
+          "dailyScenarioCoverage": 0.275,
+          "flaggedDaysPer100SeniorDays": 2.367,
+          "meanDelayAfterOnsetDays": 8
+        }
+      ],
+      "subgroups": [
+        {
+          "group": "gender:Male",
+          "identities": 50,
+          "seniorDays": 3000,
+          "reviewFlags": 109,
+          "highFlags": 71,
+          "annotatedDays": 80,
+          "reviewCoveredDays": 51,
+          "highCoveredDays": 22
+        },
+        {
+          "group": "age:80+",
+          "identities": 15,
+          "seniorDays": 900,
+          "reviewFlags": 69,
+          "highFlags": 36,
+          "annotatedDays": 80,
+          "reviewCoveredDays": 51,
+          "highCoveredDays": 22
+        },
+        {
+          "group": "diabetes-history:not-recorded",
+          "identities": 45,
+          "seniorDays": 2700,
+          "reviewFlags": 91,
+          "highFlags": 70,
+          "annotatedDays": 53,
+          "reviewCoveredDays": 36,
+          "highCoveredDays": 21
+        },
+        {
+          "group": "diabetes-history:recorded",
+          "identities": 5,
+          "seniorDays": 300,
+          "reviewFlags": 18,
+          "highFlags": 1,
+          "annotatedDays": 27,
+          "reviewCoveredDays": 15,
+          "highCoveredDays": 1
+        },
+        {
+          "group": "age:60-69",
+          "identities": 16,
+          "seniorDays": 960,
+          "reviewFlags": 27,
+          "highFlags": 25,
+          "annotatedDays": 0,
+          "reviewCoveredDays": 0,
+          "highCoveredDays": 0
+        },
+        {
+          "group": "age:70-79",
+          "identities": 19,
+          "seniorDays": 1140,
+          "reviewFlags": 13,
+          "highFlags": 10,
+          "annotatedDays": 0,
+          "reviewCoveredDays": 0,
+          "highCoveredDays": 0
+        }
+      ],
+      "ablation": {
+        "comparison": "Same cohort, split, dates, thresholds, NLP and rules; only the anomaly contribution is disabled.",
+        "rulesOnly": {
+          "precision": null,
+          "recall": 0.175,
+          "f1": null,
+          "meanLeadDays": 3.7,
+          "meanOnsetDetectionDelayDays": 6.3,
+          "detectedCases": 3,
+          "totalCases": 4
+        },
+        "rulesPlusModel": {
+          "precision": null,
+          "recall": 0.275,
+          "f1": null,
+          "meanLeadDays": 2,
+          "meanOnsetDetectionDelayDays": 8,
+          "detectedCases": 4,
+          "totalCases": 4
+        }
+      },
+      "clinicalPerformance": {
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "specificity": null,
+        "reason": "Synthetic positive scenarios are partial; unlabelled days are not confirmed negatives."
+      }
+    },
+    {
+      "strategy": "stratified-v1",
+      "splitSeed": 104,
+      "cohortSeed": 1042026,
+      "split": {
+        "strategy": "stratified-v1",
+        "seed": 104,
+        "fitIds": [
+          "S001",
+          "S002",
+          "S004",
+          "S005",
+          "S007",
+          "S008",
+          "S009",
+          "S011",
+          "S012",
+          "S013",
+          "S014",
+          "S020",
+          "S021",
+          "S022",
+          "S024",
+          "S026",
+          "S027",
+          "S031",
+          "S032",
+          "S033",
+          "S034",
+          "S035",
+          "S036",
+          "S037",
+          "S039",
+          "S040",
+          "S042",
+          "S043",
+          "S044",
+          "S045",
+          "S046",
+          "S047",
+          "S049",
+          "S050",
+          "S051",
+          "S053",
+          "S054",
+          "S058",
+          "S060",
+          "S061",
+          "S062",
+          "S064",
+          "S068",
+          "S069",
+          "S070",
+          "S071",
+          "S072",
+          "S074",
+          "S075",
+          "S081",
+          "S083",
+          "S084",
+          "S085",
+          "S087",
+          "S088",
+          "S089",
+          "S090",
+          "S091",
+          "S096",
+          "S097",
+          "S100",
+          "S101",
+          "S102",
+          "S103",
+          "S106",
+          "S107",
+          "S108",
+          "S109",
+          "S110",
+          "S112",
+          "S115",
+          "S116",
+          "S119",
+          "S121",
+          "S122",
+          "S123",
+          "S125",
+          "S126",
+          "S127",
+          "S128",
+          "S129",
+          "S130",
+          "S131",
+          "S134",
+          "S136",
+          "S139",
+          "S141",
+          "S142",
+          "S143",
+          "S144",
+          "S146",
+          "S147",
+          "S148",
+          "S150",
+          "S153",
+          "S155",
+          "S156",
+          "S159",
+          "S160",
+          "S163",
+          "S166",
+          "S168",
+          "S170",
+          "S171",
+          "S173",
+          "S175",
+          "S179",
+          "S180",
+          "S182",
+          "S183",
+          "S187",
+          "S188",
+          "S190",
+          "S191",
+          "S192",
+          "S193",
+          "S194",
+          "S195",
+          "S198",
+          "S199"
+        ],
+        "calibrationIds": [
+          "S006",
+          "S010",
+          "S015",
+          "S017",
+          "S019",
+          "S030",
+          "S052",
+          "S063",
+          "S067",
+          "S077",
+          "S080",
+          "S092",
+          "S093",
+          "S094",
+          "S095",
+          "S098",
+          "S099",
+          "S104",
+          "S111",
+          "S113",
+          "S124",
+          "S135",
+          "S154",
+          "S164",
+          "S165",
+          "S167",
+          "S169",
+          "S174",
+          "S186",
+          "S196"
+        ],
+        "evaluationIds": [
+          "S003",
+          "S016",
+          "S018",
+          "S023",
+          "S025",
+          "S028",
+          "S029",
+          "S038",
+          "S041",
+          "S048",
+          "S055",
+          "S056",
+          "S057",
+          "S059",
+          "S065",
+          "S066",
+          "S073",
+          "S076",
+          "S078",
+          "S079",
+          "S082",
+          "S086",
+          "S105",
+          "S114",
+          "S117",
+          "S118",
+          "S120",
+          "S132",
+          "S133",
+          "S137",
+          "S138",
+          "S140",
+          "S145",
+          "S149",
+          "S151",
+          "S152",
+          "S157",
+          "S158",
+          "S161",
+          "S162",
+          "S172",
+          "S176",
+          "S177",
+          "S178",
+          "S181",
+          "S184",
+          "S185",
+          "S189",
+          "S197",
+          "S200"
+        ],
+        "strata": [
+          {
+            "key": "female|60-69|diabetes-history",
+            "total": 3,
+            "fit": 1,
+            "calibration": 1,
+            "evaluation": 1
+          },
+          {
+            "key": "female|60-69|no-diabetes-history",
+            "total": 29,
+            "fit": 18,
+            "calibration": 4,
+            "evaluation": 7
+          },
+          {
+            "key": "female|70-79|diabetes-history",
+            "total": 4,
+            "fit": 2,
+            "calibration": 1,
+            "evaluation": 1
+          },
+          {
+            "key": "female|70-79|no-diabetes-history",
+            "total": 32,
+            "fit": 19,
+            "calibration": 5,
+            "evaluation": 8
+          },
+          {
+            "key": "female|80-plus|diabetes-history",
+            "total": 3,
+            "fit": 2,
+            "calibration": 0,
+            "evaluation": 1
+          },
+          {
+            "key": "female|80-plus|no-diabetes-history",
+            "total": 29,
+            "fit": 18,
+            "calibration": 4,
+            "evaluation": 7
+          },
+          {
+            "key": "male|60-69|diabetes-history",
+            "total": 14,
+            "fit": 9,
+            "calibration": 2,
+            "evaluation": 3
+          },
+          {
+            "key": "male|60-69|no-diabetes-history",
+            "total": 14,
+            "fit": 8,
+            "calibration": 2,
+            "evaluation": 4
+          },
+          {
+            "key": "male|70-79|diabetes-history",
+            "total": 21,
+            "fit": 13,
+            "calibration": 3,
+            "evaluation": 5
+          },
+          {
+            "key": "male|70-79|no-diabetes-history",
+            "total": 18,
+            "fit": 10,
+            "calibration": 3,
+            "evaluation": 5
+          },
+          {
+            "key": "male|80-plus|diabetes-history",
+            "total": 20,
+            "fit": 12,
+            "calibration": 3,
+            "evaluation": 5
+          },
+          {
+            "key": "male|80-plus|no-diabetes-history",
+            "total": 13,
+            "fit": 8,
+            "calibration": 2,
+            "evaluation": 3
+          }
+        ]
+      },
+      "profiles": {
+        "fit": {
+          "identities": 120,
+          "gender": {
+            "Female": 60,
+            "Male": 60
+          },
+          "ageBands": {
+            "60-69": 36,
+            "80+": 40,
+            "70-79": 44
+          },
+          "diabetesHistory": 39
+        },
+        "calibration": {
+          "identities": 30,
+          "gender": {
+            "Male": 15,
+            "Female": 15
+          },
+          "ageBands": {
+            "70-79": 12,
+            "60-69": 9,
+            "80+": 9
+          },
+          "diabetesHistory": 10
+        },
+        "evaluation": {
+          "identities": 50,
+          "gender": {
+            "Female": 25,
+            "Male": 25
+          },
+          "ageBands": {
+            "70-79": 19,
+            "80+": 16,
+            "60-69": 15
+          },
+          "diabetesHistory": 16
+        }
+      },
+      "calibration": {
+        "fitIdentities": 120,
+        "calibrationIdentities": 30,
+        "evaluationIdentities": 50,
+        "splitStrategy": "stratified-v1",
+        "splitSeed": 104,
+        "samples": 411,
+        "quantile": 0.975,
+        "threshold": 0.5487892188275094,
+        "observedTailFraction": 0.024330900243309004,
+        "method": "Separate development identities, baseline windows only; descriptive calibration, not a medical false-positive rate."
+      },
+      "thresholds": [
+        {
+          "threshold": 30,
+          "seniorDays": 3000,
+          "flags": 80,
+          "unlabelledFlags": 52,
+          "unknown": 9,
+          "annotatedDays": 40,
+          "coveredDays": 28,
+          "cases": [
+            {
+              "seniorId": "S003",
+              "pattern": "multisignal",
+              "onsetDate": "2026-09-12",
+              "firstFlagDate": "2026-09-17",
+              "delayAfterOnsetDays": 5
+            },
+            {
+              "seniorId": "S016",
+              "pattern": "mobility",
+              "onsetDate": "2026-10-16",
+              "firstFlagDate": "2026-10-19",
+              "delayAfterOnsetDays": 3
+            }
+          ],
+          "detectedCases": 2,
+          "totalCases": 2,
+          "dailyScenarioCoverage": 0.7,
+          "flaggedDaysPer100SeniorDays": 2.667,
+          "meanDelayAfterOnsetDays": 4
+        },
+        {
+          "threshold": 60,
+          "seniorDays": 3000,
+          "flags": 57,
+          "unlabelledFlags": 40,
+          "unknown": 9,
+          "annotatedDays": 40,
+          "coveredDays": 17,
+          "cases": [
+            {
+              "seniorId": "S003",
+              "pattern": "multisignal",
+              "onsetDate": "2026-09-12",
+              "firstFlagDate": "2026-09-18",
+              "delayAfterOnsetDays": 6
+            },
+            {
+              "seniorId": "S016",
+              "pattern": "mobility",
+              "onsetDate": "2026-10-16",
+              "firstFlagDate": "2026-10-19",
+              "delayAfterOnsetDays": 3
+            }
+          ],
+          "detectedCases": 2,
+          "totalCases": 2,
+          "dailyScenarioCoverage": 0.425,
+          "flaggedDaysPer100SeniorDays": 1.9,
+          "meanDelayAfterOnsetDays": 4.5
+        }
+      ],
+      "subgroups": [
+        {
+          "group": "gender:Female",
+          "identities": 25,
+          "seniorDays": 1500,
+          "reviewFlags": 59,
+          "highFlags": 43,
+          "annotatedDays": 28,
+          "reviewCoveredDays": 19,
+          "highCoveredDays": 13
+        },
+        {
+          "group": "age:70-79",
+          "identities": 19,
+          "seniorDays": 1140,
+          "reviewFlags": 42,
+          "highFlags": 32,
+          "annotatedDays": 28,
+          "reviewCoveredDays": 19,
+          "highCoveredDays": 13
+        },
+        {
+          "group": "diabetes-history:not-recorded",
+          "identities": 34,
+          "seniorDays": 2040,
+          "reviewFlags": 79,
+          "highFlags": 57,
+          "annotatedDays": 40,
+          "reviewCoveredDays": 28,
+          "highCoveredDays": 17
+        },
+        {
+          "group": "gender:Male",
+          "identities": 25,
+          "seniorDays": 1500,
+          "reviewFlags": 21,
+          "highFlags": 14,
+          "annotatedDays": 12,
+          "reviewCoveredDays": 9,
+          "highCoveredDays": 4
+        },
+        {
+          "group": "age:80+",
+          "identities": 16,
+          "seniorDays": 960,
+          "reviewFlags": 19,
+          "highFlags": 13,
+          "annotatedDays": 12,
+          "reviewCoveredDays": 9,
+          "highCoveredDays": 4
+        },
+        {
+          "group": "diabetes-history:recorded",
+          "identities": 16,
+          "seniorDays": 960,
+          "reviewFlags": 1,
+          "highFlags": 0,
+          "annotatedDays": 0,
+          "reviewCoveredDays": 0,
+          "highCoveredDays": 0
+        },
+        {
+          "group": "age:60-69",
+          "identities": 15,
+          "seniorDays": 900,
+          "reviewFlags": 19,
+          "highFlags": 12,
+          "annotatedDays": 0,
+          "reviewCoveredDays": 0,
+          "highCoveredDays": 0
+        }
+      ],
+      "ablation": {
+        "comparison": "Same cohort, split, dates, thresholds, NLP and rules; only the anomaly contribution is disabled.",
+        "rulesOnly": {
+          "precision": null,
+          "recall": 0.275,
+          "f1": null,
+          "meanLeadDays": 3.5,
+          "meanOnsetDetectionDelayDays": 6.5,
+          "detectedCases": 2,
+          "totalCases": 2
+        },
+        "rulesPlusModel": {
+          "precision": null,
+          "recall": 0.425,
+          "f1": null,
+          "meanLeadDays": 5.5,
+          "meanOnsetDetectionDelayDays": 4.5,
+          "detectedCases": 2,
+          "totalCases": 2
+        }
+      },
+      "clinicalPerformance": {
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "specificity": null,
+        "reason": "Synthetic positive scenarios are partial; unlabelled days are not confirmed negatives."
+      }
+    },
+    {
+      "strategy": "legacy-modulo",
+      "splitSeed": 104,
+      "cohortSeed": 1042027,
+      "split": {
+        "strategy": "legacy-modulo",
+        "seed": 104,
+        "fitIds": [
+          "S001",
+          "S003",
+          "S005",
+          "S006",
+          "S009",
+          "S010",
+          "S011",
+          "S013",
+          "S014",
+          "S015",
+          "S018",
+          "S021",
+          "S023",
+          "S026",
+          "S027",
+          "S029",
+          "S030",
+          "S031",
+          "S033",
+          "S035",
+          "S037",
+          "S038",
+          "S041",
+          "S042",
+          "S045",
+          "S047",
+          "S050",
+          "S051",
+          "S053",
+          "S054",
+          "S057",
+          "S058",
+          "S059",
+          "S061",
+          "S062",
+          "S063",
+          "S065",
+          "S066",
+          "S067",
+          "S070",
+          "S071",
+          "S073",
+          "S074",
+          "S077",
+          "S079",
+          "S081",
+          "S082",
+          "S083",
+          "S086",
+          "S087",
+          "S089",
+          "S090",
+          "S093",
+          "S094",
+          "S095",
+          "S097",
+          "S098",
+          "S099",
+          "S101",
+          "S102",
+          "S103",
+          "S105",
+          "S106",
+          "S107",
+          "S109",
+          "S110",
+          "S113",
+          "S114",
+          "S115",
+          "S117",
+          "S118",
+          "S119",
+          "S121",
+          "S122",
+          "S125",
+          "S127",
+          "S129",
+          "S130",
+          "S131",
+          "S134",
+          "S135",
+          "S137",
+          "S138",
+          "S139",
+          "S142",
+          "S143",
+          "S145",
+          "S147",
+          "S149",
+          "S151",
+          "S153",
+          "S154",
+          "S155",
+          "S157",
+          "S158",
+          "S159",
+          "S162",
+          "S163",
+          "S165",
+          "S166",
+          "S167",
+          "S169",
+          "S170",
+          "S171",
+          "S173",
+          "S174",
+          "S175",
+          "S178",
+          "S181",
+          "S183",
+          "S186",
+          "S187",
+          "S189",
+          "S190",
+          "S191",
+          "S193",
+          "S194",
+          "S195",
+          "S198",
+          "S199"
+        ],
+        "calibrationIds": [
+          "S002",
+          "S007",
+          "S017",
+          "S019",
+          "S022",
+          "S025",
+          "S034",
+          "S039",
+          "S043",
+          "S046",
+          "S049",
+          "S055",
+          "S069",
+          "S075",
+          "S078",
+          "S085",
+          "S091",
+          "S111",
+          "S123",
+          "S126",
+          "S133",
+          "S141",
+          "S146",
+          "S150",
+          "S161",
+          "S177",
+          "S179",
+          "S182",
+          "S185",
+          "S197"
+        ],
+        "evaluationIds": [
+          "S004",
+          "S008",
+          "S012",
+          "S016",
+          "S020",
+          "S024",
+          "S028",
+          "S032",
+          "S036",
+          "S040",
+          "S044",
+          "S048",
+          "S052",
+          "S056",
+          "S060",
+          "S064",
+          "S068",
+          "S072",
+          "S076",
+          "S080",
+          "S084",
+          "S088",
+          "S092",
+          "S096",
+          "S100",
+          "S104",
+          "S108",
+          "S112",
+          "S116",
+          "S120",
+          "S124",
+          "S128",
+          "S132",
+          "S136",
+          "S140",
+          "S144",
+          "S148",
+          "S152",
+          "S156",
+          "S160",
+          "S164",
+          "S168",
+          "S172",
+          "S176",
+          "S180",
+          "S184",
+          "S188",
+          "S192",
+          "S196",
+          "S200"
+        ],
+        "strata": [
+          {
+            "key": "female|60-69|diabetes-history",
+            "total": 3,
+            "fit": 2,
+            "calibration": 1,
+            "evaluation": 0
+          },
+          {
+            "key": "female|60-69|no-diabetes-history",
+            "total": 29,
+            "fit": 24,
+            "calibration": 5,
+            "evaluation": 0
+          },
+          {
+            "key": "female|70-79|diabetes-history",
+            "total": 4,
+            "fit": 2,
+            "calibration": 2,
+            "evaluation": 0
+          },
+          {
+            "key": "female|70-79|no-diabetes-history",
+            "total": 32,
+            "fit": 25,
+            "calibration": 7,
+            "evaluation": 0
+          },
+          {
+            "key": "female|80-plus|diabetes-history",
+            "total": 3,
+            "fit": 3,
+            "calibration": 0,
+            "evaluation": 0
+          },
+          {
+            "key": "female|80-plus|no-diabetes-history",
+            "total": 29,
+            "fit": 23,
+            "calibration": 6,
+            "evaluation": 0
+          },
+          {
+            "key": "male|60-69|diabetes-history",
+            "total": 14,
+            "fit": 11,
+            "calibration": 1,
+            "evaluation": 2
+          },
+          {
+            "key": "male|60-69|no-diabetes-history",
+            "total": 14,
+            "fit": 0,
+            "calibration": 0,
+            "evaluation": 14
+          },
+          {
+            "key": "male|70-79|diabetes-history",
+            "total": 21,
+            "fit": 15,
+            "calibration": 5,
+            "evaluation": 1
+          },
+          {
+            "key": "male|70-79|no-diabetes-history",
+            "total": 18,
+            "fit": 0,
+            "calibration": 0,
+            "evaluation": 18
+          },
+          {
+            "key": "male|80-plus|diabetes-history",
+            "total": 20,
+            "fit": 15,
+            "calibration": 3,
+            "evaluation": 2
+          },
+          {
+            "key": "male|80-plus|no-diabetes-history",
+            "total": 13,
+            "fit": 0,
+            "calibration": 0,
+            "evaluation": 13
+          }
+        ]
+      },
+      "profiles": {
+        "fit": {
+          "identities": 120,
+          "gender": {
+            "Female": 79,
+            "Male": 41
+          },
+          "ageBands": {
+            "60-69": 37,
+            "70-79": 42,
+            "80+": 41
+          },
+          "diabetesHistory": 48
+        },
+        "calibration": {
+          "identities": 30,
+          "gender": {
+            "Male": 9,
+            "Female": 21
+          },
+          "ageBands": {
+            "60-69": 7,
+            "70-79": 14,
+            "80+": 9
+          },
+          "diabetesHistory": 12
+        },
+        "evaluation": {
+          "identities": 50,
+          "gender": {
+            "Male": 50
+          },
+          "ageBands": {
+            "80+": 15,
+            "60-69": 16,
+            "70-79": 19
+          },
+          "diabetesHistory": 5
+        }
+      },
+      "calibration": {
+        "fitIdentities": 120,
+        "calibrationIdentities": 30,
+        "evaluationIdentities": 50,
+        "splitStrategy": "legacy-modulo",
+        "splitSeed": 104,
+        "samples": 416,
+        "quantile": 0.975,
+        "threshold": 0.5610535794242631,
+        "observedTailFraction": 0.02403846153846154,
+        "method": "Separate development identities, baseline windows only; descriptive calibration, not a medical false-positive rate."
+      },
+      "thresholds": [
+        {
+          "threshold": 30,
+          "seniorDays": 3000,
+          "flags": 130,
+          "unlabelledFlags": 74,
+          "unknown": 8,
+          "annotatedDays": 80,
+          "coveredDays": 56,
+          "cases": [
+            {
+              "seniorId": "S004",
+              "pattern": "multisignal",
+              "onsetDate": "2026-09-15",
+              "firstFlagDate": "2026-09-18",
+              "delayAfterOnsetDays": 3
+            },
+            {
+              "seniorId": "S008",
+              "pattern": "medication",
+              "onsetDate": "2026-10-16",
+              "firstFlagDate": "2026-10-19",
+              "delayAfterOnsetDays": 3
+            },
+            {
+              "seniorId": "S012",
+              "pattern": "appetite",
+              "onsetDate": "2026-09-15",
+              "firstFlagDate": "2026-09-20",
+              "delayAfterOnsetDays": 5
+            },
+            {
+              "seniorId": "S016",
+              "pattern": "mobility",
+              "onsetDate": "2026-10-16",
+              "firstFlagDate": "2026-10-19",
+              "delayAfterOnsetDays": 3
+            }
+          ],
+          "detectedCases": 4,
+          "totalCases": 4,
+          "dailyScenarioCoverage": 0.7,
+          "flaggedDaysPer100SeniorDays": 4.333,
+          "meanDelayAfterOnsetDays": 3.5
+        },
+        {
+          "threshold": 60,
+          "seniorDays": 3000,
+          "flags": 92,
+          "unlabelledFlags": 62,
+          "unknown": 8,
+          "annotatedDays": 80,
+          "coveredDays": 30,
+          "cases": [
+            {
+              "seniorId": "S004",
+              "pattern": "multisignal",
+              "onsetDate": "2026-09-15",
+              "firstFlagDate": "2026-09-22",
+              "delayAfterOnsetDays": 7
+            },
+            {
+              "seniorId": "S008",
+              "pattern": "medication",
+              "onsetDate": "2026-10-16",
+              "firstFlagDate": "2026-10-24",
+              "delayAfterOnsetDays": 8
+            },
+            {
+              "seniorId": "S012",
+              "pattern": "appetite",
+              "onsetDate": "2026-09-15",
+              "firstFlagDate": "2026-09-22",
+              "delayAfterOnsetDays": 7
+            },
+            {
+              "seniorId": "S016",
+              "pattern": "mobility",
+              "onsetDate": "2026-10-16",
+              "firstFlagDate": "2026-10-19",
+              "delayAfterOnsetDays": 3
+            }
+          ],
+          "detectedCases": 4,
+          "totalCases": 4,
+          "dailyScenarioCoverage": 0.375,
+          "flaggedDaysPer100SeniorDays": 3.067,
+          "meanDelayAfterOnsetDays": 6.25
+        }
+      ],
+      "subgroups": [
+        {
+          "group": "gender:Male",
+          "identities": 50,
+          "seniorDays": 3000,
+          "reviewFlags": 130,
+          "highFlags": 92,
+          "annotatedDays": 80,
+          "reviewCoveredDays": 56,
+          "highCoveredDays": 30
+        },
+        {
+          "group": "age:80+",
+          "identities": 15,
+          "seniorDays": 900,
+          "reviewFlags": 76,
+          "highFlags": 45,
+          "annotatedDays": 80,
+          "reviewCoveredDays": 56,
+          "highCoveredDays": 30
+        },
+        {
+          "group": "diabetes-history:not-recorded",
+          "identities": 45,
+          "seniorDays": 2700,
+          "reviewFlags": 114,
+          "highFlags": 84,
+          "annotatedDays": 53,
+          "reviewCoveredDays": 40,
+          "highCoveredDays": 22
+        },
+        {
+          "group": "diabetes-history:recorded",
+          "identities": 5,
+          "seniorDays": 300,
+          "reviewFlags": 16,
+          "highFlags": 8,
+          "annotatedDays": 27,
+          "reviewCoveredDays": 16,
+          "highCoveredDays": 8
+        },
+        {
+          "group": "age:60-69",
+          "identities": 16,
+          "seniorDays": 960,
+          "reviewFlags": 20,
+          "highFlags": 13,
+          "annotatedDays": 0,
+          "reviewCoveredDays": 0,
+          "highCoveredDays": 0
+        },
+        {
+          "group": "age:70-79",
+          "identities": 19,
+          "seniorDays": 1140,
+          "reviewFlags": 34,
+          "highFlags": 34,
+          "annotatedDays": 0,
+          "reviewCoveredDays": 0,
+          "highCoveredDays": 0
+        }
+      ],
+      "ablation": {
+        "comparison": "Same cohort, split, dates, thresholds, NLP and rules; only the anomaly contribution is disabled.",
+        "rulesOnly": {
+          "precision": null,
+          "recall": 0.263,
+          "f1": null,
+          "meanLeadDays": 3,
+          "meanOnsetDetectionDelayDays": 7,
+          "detectedCases": 4,
+          "totalCases": 4
+        },
+        "rulesPlusModel": {
+          "precision": null,
+          "recall": 0.375,
+          "f1": null,
+          "meanLeadDays": 3.8,
+          "meanOnsetDetectionDelayDays": 6.3,
+          "detectedCases": 4,
+          "totalCases": 4
+        }
+      },
+      "clinicalPerformance": {
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "specificity": null,
+        "reason": "Synthetic positive scenarios are partial; unlabelled days are not confirmed negatives."
+      }
+    },
+    {
+      "strategy": "stratified-v1",
+      "splitSeed": 104,
+      "cohortSeed": 1042027,
+      "split": {
+        "strategy": "stratified-v1",
+        "seed": 104,
+        "fitIds": [
+          "S001",
+          "S002",
+          "S004",
+          "S005",
+          "S007",
+          "S008",
+          "S009",
+          "S011",
+          "S012",
+          "S013",
+          "S014",
+          "S020",
+          "S021",
+          "S022",
+          "S024",
+          "S026",
+          "S027",
+          "S031",
+          "S032",
+          "S033",
+          "S034",
+          "S035",
+          "S036",
+          "S037",
+          "S039",
+          "S040",
+          "S042",
+          "S043",
+          "S044",
+          "S045",
+          "S046",
+          "S047",
+          "S049",
+          "S050",
+          "S051",
+          "S053",
+          "S054",
+          "S058",
+          "S060",
+          "S061",
+          "S062",
+          "S064",
+          "S068",
+          "S069",
+          "S070",
+          "S071",
+          "S072",
+          "S074",
+          "S075",
+          "S081",
+          "S083",
+          "S084",
+          "S085",
+          "S087",
+          "S088",
+          "S089",
+          "S090",
+          "S091",
+          "S096",
+          "S097",
+          "S100",
+          "S101",
+          "S102",
+          "S103",
+          "S106",
+          "S107",
+          "S108",
+          "S109",
+          "S110",
+          "S112",
+          "S115",
+          "S116",
+          "S119",
+          "S121",
+          "S122",
+          "S123",
+          "S125",
+          "S126",
+          "S127",
+          "S128",
+          "S129",
+          "S130",
+          "S131",
+          "S134",
+          "S136",
+          "S139",
+          "S141",
+          "S142",
+          "S143",
+          "S144",
+          "S146",
+          "S147",
+          "S148",
+          "S150",
+          "S153",
+          "S155",
+          "S156",
+          "S159",
+          "S160",
+          "S163",
+          "S166",
+          "S168",
+          "S170",
+          "S171",
+          "S173",
+          "S175",
+          "S179",
+          "S180",
+          "S182",
+          "S183",
+          "S187",
+          "S188",
+          "S190",
+          "S191",
+          "S192",
+          "S193",
+          "S194",
+          "S195",
+          "S198",
+          "S199"
+        ],
+        "calibrationIds": [
+          "S006",
+          "S010",
+          "S015",
+          "S017",
+          "S019",
+          "S030",
+          "S052",
+          "S063",
+          "S067",
+          "S077",
+          "S080",
+          "S092",
+          "S093",
+          "S094",
+          "S095",
+          "S098",
+          "S099",
+          "S104",
+          "S111",
+          "S113",
+          "S124",
+          "S135",
+          "S154",
+          "S164",
+          "S165",
+          "S167",
+          "S169",
+          "S174",
+          "S186",
+          "S196"
+        ],
+        "evaluationIds": [
+          "S003",
+          "S016",
+          "S018",
+          "S023",
+          "S025",
+          "S028",
+          "S029",
+          "S038",
+          "S041",
+          "S048",
+          "S055",
+          "S056",
+          "S057",
+          "S059",
+          "S065",
+          "S066",
+          "S073",
+          "S076",
+          "S078",
+          "S079",
+          "S082",
+          "S086",
+          "S105",
+          "S114",
+          "S117",
+          "S118",
+          "S120",
+          "S132",
+          "S133",
+          "S137",
+          "S138",
+          "S140",
+          "S145",
+          "S149",
+          "S151",
+          "S152",
+          "S157",
+          "S158",
+          "S161",
+          "S162",
+          "S172",
+          "S176",
+          "S177",
+          "S178",
+          "S181",
+          "S184",
+          "S185",
+          "S189",
+          "S197",
+          "S200"
+        ],
+        "strata": [
+          {
+            "key": "female|60-69|diabetes-history",
+            "total": 3,
+            "fit": 1,
+            "calibration": 1,
+            "evaluation": 1
+          },
+          {
+            "key": "female|60-69|no-diabetes-history",
+            "total": 29,
+            "fit": 18,
+            "calibration": 4,
+            "evaluation": 7
+          },
+          {
+            "key": "female|70-79|diabetes-history",
+            "total": 4,
+            "fit": 2,
+            "calibration": 1,
+            "evaluation": 1
+          },
+          {
+            "key": "female|70-79|no-diabetes-history",
+            "total": 32,
+            "fit": 19,
+            "calibration": 5,
+            "evaluation": 8
+          },
+          {
+            "key": "female|80-plus|diabetes-history",
+            "total": 3,
+            "fit": 2,
+            "calibration": 0,
+            "evaluation": 1
+          },
+          {
+            "key": "female|80-plus|no-diabetes-history",
+            "total": 29,
+            "fit": 18,
+            "calibration": 4,
+            "evaluation": 7
+          },
+          {
+            "key": "male|60-69|diabetes-history",
+            "total": 14,
+            "fit": 9,
+            "calibration": 2,
+            "evaluation": 3
+          },
+          {
+            "key": "male|60-69|no-diabetes-history",
+            "total": 14,
+            "fit": 8,
+            "calibration": 2,
+            "evaluation": 4
+          },
+          {
+            "key": "male|70-79|diabetes-history",
+            "total": 21,
+            "fit": 13,
+            "calibration": 3,
+            "evaluation": 5
+          },
+          {
+            "key": "male|70-79|no-diabetes-history",
+            "total": 18,
+            "fit": 10,
+            "calibration": 3,
+            "evaluation": 5
+          },
+          {
+            "key": "male|80-plus|diabetes-history",
+            "total": 20,
+            "fit": 12,
+            "calibration": 3,
+            "evaluation": 5
+          },
+          {
+            "key": "male|80-plus|no-diabetes-history",
+            "total": 13,
+            "fit": 8,
+            "calibration": 2,
+            "evaluation": 3
+          }
+        ]
+      },
+      "profiles": {
+        "fit": {
+          "identities": 120,
+          "gender": {
+            "Female": 60,
+            "Male": 60
+          },
+          "ageBands": {
+            "60-69": 36,
+            "80+": 40,
+            "70-79": 44
+          },
+          "diabetesHistory": 39
+        },
+        "calibration": {
+          "identities": 30,
+          "gender": {
+            "Male": 15,
+            "Female": 15
+          },
+          "ageBands": {
+            "70-79": 12,
+            "60-69": 9,
+            "80+": 9
+          },
+          "diabetesHistory": 10
+        },
+        "evaluation": {
+          "identities": 50,
+          "gender": {
+            "Female": 25,
+            "Male": 25
+          },
+          "ageBands": {
+            "70-79": 19,
+            "80+": 16,
+            "60-69": 15
+          },
+          "diabetesHistory": 16
+        }
+      },
+      "calibration": {
+        "fitIdentities": 120,
+        "calibrationIdentities": 30,
+        "evaluationIdentities": 50,
+        "splitStrategy": "stratified-v1",
+        "splitSeed": 104,
+        "samples": 417,
+        "quantile": 0.975,
+        "threshold": 0.5798406072954447,
+        "observedTailFraction": 0.023980815347721823,
+        "method": "Separate development identities, baseline windows only; descriptive calibration, not a medical false-positive rate."
+      },
+      "thresholds": [
+        {
+          "threshold": 30,
+          "seniorDays": 3000,
+          "flags": 89,
+          "unlabelledFlags": 59,
+          "unknown": 12,
+          "annotatedDays": 40,
+          "coveredDays": 30,
+          "cases": [
+            {
+              "seniorId": "S003",
+              "pattern": "multisignal",
+              "onsetDate": "2026-09-12",
+              "firstFlagDate": "2026-09-16",
+              "delayAfterOnsetDays": 4
+            },
+            {
+              "seniorId": "S016",
+              "pattern": "mobility",
+              "onsetDate": "2026-10-16",
+              "firstFlagDate": "2026-10-19",
+              "delayAfterOnsetDays": 3
+            }
+          ],
+          "detectedCases": 2,
+          "totalCases": 2,
+          "dailyScenarioCoverage": 0.75,
+          "flaggedDaysPer100SeniorDays": 2.967,
+          "meanDelayAfterOnsetDays": 3.5
+        },
+        {
+          "threshold": 60,
+          "seniorDays": 3000,
+          "flags": 61,
+          "unlabelledFlags": 43,
+          "unknown": 12,
+          "annotatedDays": 40,
+          "coveredDays": 18,
+          "cases": [
+            {
+              "seniorId": "S003",
+              "pattern": "multisignal",
+              "onsetDate": "2026-09-12",
+              "firstFlagDate": "2026-09-17",
+              "delayAfterOnsetDays": 5
+            },
+            {
+              "seniorId": "S016",
+              "pattern": "mobility",
+              "onsetDate": "2026-10-16",
+              "firstFlagDate": "2026-10-19",
+              "delayAfterOnsetDays": 3
+            }
+          ],
+          "detectedCases": 2,
+          "totalCases": 2,
+          "dailyScenarioCoverage": 0.45,
+          "flaggedDaysPer100SeniorDays": 2.033,
+          "meanDelayAfterOnsetDays": 4
+        }
+      ],
+      "subgroups": [
+        {
+          "group": "gender:Female",
+          "identities": 25,
+          "seniorDays": 1500,
+          "reviewFlags": 59,
+          "highFlags": 42,
+          "annotatedDays": 28,
+          "reviewCoveredDays": 21,
+          "highCoveredDays": 13
+        },
+        {
+          "group": "age:70-79",
+          "identities": 19,
+          "seniorDays": 1140,
+          "reviewFlags": 44,
+          "highFlags": 35,
+          "annotatedDays": 28,
+          "reviewCoveredDays": 21,
+          "highCoveredDays": 13
+        },
+        {
+          "group": "diabetes-history:not-recorded",
+          "identities": 34,
+          "seniorDays": 2040,
+          "reviewFlags": 82,
+          "highFlags": 61,
+          "annotatedDays": 40,
+          "reviewCoveredDays": 30,
+          "highCoveredDays": 18
+        },
+        {
+          "group": "gender:Male",
+          "identities": 25,
+          "seniorDays": 1500,
+          "reviewFlags": 30,
+          "highFlags": 19,
+          "annotatedDays": 12,
+          "reviewCoveredDays": 9,
+          "highCoveredDays": 5
+        },
+        {
+          "group": "age:80+",
+          "identities": 16,
+          "seniorDays": 960,
+          "reviewFlags": 29,
+          "highFlags": 15,
+          "annotatedDays": 12,
+          "reviewCoveredDays": 9,
+          "highCoveredDays": 5
+        },
+        {
+          "group": "diabetes-history:recorded",
+          "identities": 16,
+          "seniorDays": 960,
+          "reviewFlags": 7,
+          "highFlags": 0,
+          "annotatedDays": 0,
+          "reviewCoveredDays": 0,
+          "highCoveredDays": 0
+        },
+        {
+          "group": "age:60-69",
+          "identities": 15,
+          "seniorDays": 900,
+          "reviewFlags": 16,
+          "highFlags": 11,
+          "annotatedDays": 0,
+          "reviewCoveredDays": 0,
+          "highCoveredDays": 0
+        }
+      ],
+      "ablation": {
+        "comparison": "Same cohort, split, dates, thresholds, NLP and rules; only the anomaly contribution is disabled.",
+        "rulesOnly": {
+          "precision": null,
+          "recall": 0.325,
+          "f1": null,
+          "meanLeadDays": 5.5,
+          "meanOnsetDetectionDelayDays": 4.5,
+          "detectedCases": 2,
+          "totalCases": 2
+        },
+        "rulesPlusModel": {
+          "precision": null,
+          "recall": 0.45,
+          "f1": null,
+          "meanLeadDays": 6,
+          "meanOnsetDetectionDelayDays": 4,
+          "detectedCases": 2,
+          "totalCases": 2
+        }
+      },
+      "clinicalPerformance": {
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "specificity": null,
+        "reason": "Synthetic positive scenarios are partial; unlabelled days are not confirmed negatives."
+      }
+    },
+    {
+      "strategy": "legacy-modulo",
+      "splitSeed": 104,
+      "cohortSeed": 1042028,
+      "split": {
+        "strategy": "legacy-modulo",
+        "seed": 104,
+        "fitIds": [
+          "S001",
+          "S003",
+          "S005",
+          "S006",
+          "S009",
+          "S010",
+          "S011",
+          "S013",
+          "S014",
+          "S015",
+          "S018",
+          "S021",
+          "S023",
+          "S026",
+          "S027",
+          "S029",
+          "S030",
+          "S031",
+          "S033",
+          "S035",
+          "S037",
+          "S038",
+          "S041",
+          "S042",
+          "S045",
+          "S047",
+          "S050",
+          "S051",
+          "S053",
+          "S054",
+          "S057",
+          "S058",
+          "S059",
+          "S061",
+          "S062",
+          "S063",
+          "S065",
+          "S066",
+          "S067",
+          "S070",
+          "S071",
+          "S073",
+          "S074",
+          "S077",
+          "S079",
+          "S081",
+          "S082",
+          "S083",
+          "S086",
+          "S087",
+          "S089",
+          "S090",
+          "S093",
+          "S094",
+          "S095",
+          "S097",
+          "S098",
+          "S099",
+          "S101",
+          "S102",
+          "S103",
+          "S105",
+          "S106",
+          "S107",
+          "S109",
+          "S110",
+          "S113",
+          "S114",
+          "S115",
+          "S117",
+          "S118",
+          "S119",
+          "S121",
+          "S122",
+          "S125",
+          "S127",
+          "S129",
+          "S130",
+          "S131",
+          "S134",
+          "S135",
+          "S137",
+          "S138",
+          "S139",
+          "S142",
+          "S143",
+          "S145",
+          "S147",
+          "S149",
+          "S151",
+          "S153",
+          "S154",
+          "S155",
+          "S157",
+          "S158",
+          "S159",
+          "S162",
+          "S163",
+          "S165",
+          "S166",
+          "S167",
+          "S169",
+          "S170",
+          "S171",
+          "S173",
+          "S174",
+          "S175",
+          "S178",
+          "S181",
+          "S183",
+          "S186",
+          "S187",
+          "S189",
+          "S190",
+          "S191",
+          "S193",
+          "S194",
+          "S195",
+          "S198",
+          "S199"
+        ],
+        "calibrationIds": [
+          "S002",
+          "S007",
+          "S017",
+          "S019",
+          "S022",
+          "S025",
+          "S034",
+          "S039",
+          "S043",
+          "S046",
+          "S049",
+          "S055",
+          "S069",
+          "S075",
+          "S078",
+          "S085",
+          "S091",
+          "S111",
+          "S123",
+          "S126",
+          "S133",
+          "S141",
+          "S146",
+          "S150",
+          "S161",
+          "S177",
+          "S179",
+          "S182",
+          "S185",
+          "S197"
+        ],
+        "evaluationIds": [
+          "S004",
+          "S008",
+          "S012",
+          "S016",
+          "S020",
+          "S024",
+          "S028",
+          "S032",
+          "S036",
+          "S040",
+          "S044",
+          "S048",
+          "S052",
+          "S056",
+          "S060",
+          "S064",
+          "S068",
+          "S072",
+          "S076",
+          "S080",
+          "S084",
+          "S088",
+          "S092",
+          "S096",
+          "S100",
+          "S104",
+          "S108",
+          "S112",
+          "S116",
+          "S120",
+          "S124",
+          "S128",
+          "S132",
+          "S136",
+          "S140",
+          "S144",
+          "S148",
+          "S152",
+          "S156",
+          "S160",
+          "S164",
+          "S168",
+          "S172",
+          "S176",
+          "S180",
+          "S184",
+          "S188",
+          "S192",
+          "S196",
+          "S200"
+        ],
+        "strata": [
+          {
+            "key": "female|60-69|diabetes-history",
+            "total": 3,
+            "fit": 2,
+            "calibration": 1,
+            "evaluation": 0
+          },
+          {
+            "key": "female|60-69|no-diabetes-history",
+            "total": 29,
+            "fit": 24,
+            "calibration": 5,
+            "evaluation": 0
+          },
+          {
+            "key": "female|70-79|diabetes-history",
+            "total": 4,
+            "fit": 2,
+            "calibration": 2,
+            "evaluation": 0
+          },
+          {
+            "key": "female|70-79|no-diabetes-history",
+            "total": 32,
+            "fit": 25,
+            "calibration": 7,
+            "evaluation": 0
+          },
+          {
+            "key": "female|80-plus|diabetes-history",
+            "total": 3,
+            "fit": 3,
+            "calibration": 0,
+            "evaluation": 0
+          },
+          {
+            "key": "female|80-plus|no-diabetes-history",
+            "total": 29,
+            "fit": 23,
+            "calibration": 6,
+            "evaluation": 0
+          },
+          {
+            "key": "male|60-69|diabetes-history",
+            "total": 14,
+            "fit": 11,
+            "calibration": 1,
+            "evaluation": 2
+          },
+          {
+            "key": "male|60-69|no-diabetes-history",
+            "total": 14,
+            "fit": 0,
+            "calibration": 0,
+            "evaluation": 14
+          },
+          {
+            "key": "male|70-79|diabetes-history",
+            "total": 21,
+            "fit": 15,
+            "calibration": 5,
+            "evaluation": 1
+          },
+          {
+            "key": "male|70-79|no-diabetes-history",
+            "total": 18,
+            "fit": 0,
+            "calibration": 0,
+            "evaluation": 18
+          },
+          {
+            "key": "male|80-plus|diabetes-history",
+            "total": 20,
+            "fit": 15,
+            "calibration": 3,
+            "evaluation": 2
+          },
+          {
+            "key": "male|80-plus|no-diabetes-history",
+            "total": 13,
+            "fit": 0,
+            "calibration": 0,
+            "evaluation": 13
+          }
+        ]
+      },
+      "profiles": {
+        "fit": {
+          "identities": 120,
+          "gender": {
+            "Female": 79,
+            "Male": 41
+          },
+          "ageBands": {
+            "60-69": 37,
+            "70-79": 42,
+            "80+": 41
+          },
+          "diabetesHistory": 48
+        },
+        "calibration": {
+          "identities": 30,
+          "gender": {
+            "Male": 9,
+            "Female": 21
+          },
+          "ageBands": {
+            "60-69": 7,
+            "70-79": 14,
+            "80+": 9
+          },
+          "diabetesHistory": 12
+        },
+        "evaluation": {
+          "identities": 50,
+          "gender": {
+            "Male": 50
+          },
+          "ageBands": {
+            "80+": 15,
+            "60-69": 16,
+            "70-79": 19
+          },
+          "diabetesHistory": 5
+        }
+      },
+      "calibration": {
+        "fitIdentities": 120,
+        "calibrationIdentities": 30,
+        "evaluationIdentities": 50,
+        "splitStrategy": "legacy-modulo",
+        "splitSeed": 104,
+        "samples": 415,
+        "quantile": 0.975,
+        "threshold": 0.574761891898682,
+        "observedTailFraction": 0.024096385542168676,
+        "method": "Separate development identities, baseline windows only; descriptive calibration, not a medical false-positive rate."
+      },
+      "thresholds": [
+        {
+          "threshold": 30,
+          "seniorDays": 3000,
+          "flags": 133,
+          "unlabelledFlags": 75,
+          "unknown": 11,
+          "annotatedDays": 80,
+          "coveredDays": 58,
+          "cases": [
+            {
+              "seniorId": "S004",
+              "pattern": "multisignal",
+              "onsetDate": "2026-09-15",
+              "firstFlagDate": "2026-09-19",
+              "delayAfterOnsetDays": 4
+            },
+            {
+              "seniorId": "S008",
+              "pattern": "medication",
+              "onsetDate": "2026-10-16",
+              "firstFlagDate": "2026-10-20",
+              "delayAfterOnsetDays": 4
+            },
+            {
+              "seniorId": "S012",
+              "pattern": "appetite",
+              "onsetDate": "2026-09-15",
+              "firstFlagDate": "2026-09-18",
+              "delayAfterOnsetDays": 3
+            },
+            {
+              "seniorId": "S016",
+              "pattern": "mobility",
+              "onsetDate": "2026-10-16",
+              "firstFlagDate": "2026-10-19",
+              "delayAfterOnsetDays": 3
+            }
+          ],
+          "detectedCases": 4,
+          "totalCases": 4,
+          "dailyScenarioCoverage": 0.725,
+          "flaggedDaysPer100SeniorDays": 4.433,
+          "meanDelayAfterOnsetDays": 3.5
+        },
+        {
+          "threshold": 60,
+          "seniorDays": 3000,
+          "flags": 89,
+          "unlabelledFlags": 62,
+          "unknown": 11,
+          "annotatedDays": 80,
+          "coveredDays": 27,
+          "cases": [
+            {
+              "seniorId": "S004",
+              "pattern": "multisignal",
+              "onsetDate": "2026-09-15",
+              "firstFlagDate": "2026-09-22",
+              "delayAfterOnsetDays": 7
+            },
+            {
+              "seniorId": "S008",
+              "pattern": "medication",
+              "onsetDate": "2026-10-16",
+              "firstFlagDate": "2026-10-23",
+              "delayAfterOnsetDays": 7
+            },
+            {
+              "seniorId": "S012",
+              "pattern": "appetite",
+              "onsetDate": "2026-09-15",
+              "firstFlagDate": "2026-09-25",
+              "delayAfterOnsetDays": 10
+            },
+            {
+              "seniorId": "S016",
+              "pattern": "mobility",
+              "onsetDate": "2026-10-16",
+              "firstFlagDate": "2026-10-19",
+              "delayAfterOnsetDays": 3
+            }
+          ],
+          "detectedCases": 4,
+          "totalCases": 4,
+          "dailyScenarioCoverage": 0.338,
+          "flaggedDaysPer100SeniorDays": 2.967,
+          "meanDelayAfterOnsetDays": 6.75
+        }
+      ],
+      "subgroups": [
+        {
+          "group": "gender:Male",
+          "identities": 50,
+          "seniorDays": 3000,
+          "reviewFlags": 133,
+          "highFlags": 89,
+          "annotatedDays": 80,
+          "reviewCoveredDays": 58,
+          "highCoveredDays": 27
+        },
+        {
+          "group": "age:80+",
+          "identities": 15,
+          "seniorDays": 900,
+          "reviewFlags": 75,
+          "highFlags": 37,
+          "annotatedDays": 80,
+          "reviewCoveredDays": 58,
+          "highCoveredDays": 27
+        },
+        {
+          "group": "diabetes-history:not-recorded",
+          "identities": 45,
+          "seniorDays": 2700,
+          "reviewFlags": 111,
+          "highFlags": 83,
+          "annotatedDays": 53,
+          "reviewCoveredDays": 38,
+          "highCoveredDays": 21
+        },
+        {
+          "group": "diabetes-history:recorded",
+          "identities": 5,
+          "seniorDays": 300,
+          "reviewFlags": 22,
+          "highFlags": 6,
+          "annotatedDays": 27,
+          "reviewCoveredDays": 20,
+          "highCoveredDays": 6
+        },
+        {
+          "group": "age:60-69",
+          "identities": 16,
+          "seniorDays": 960,
+          "reviewFlags": 24,
+          "highFlags": 22,
+          "annotatedDays": 0,
+          "reviewCoveredDays": 0,
+          "highCoveredDays": 0
+        },
+        {
+          "group": "age:70-79",
+          "identities": 19,
+          "seniorDays": 1140,
+          "reviewFlags": 34,
+          "highFlags": 30,
+          "annotatedDays": 0,
+          "reviewCoveredDays": 0,
+          "highCoveredDays": 0
+        }
+      ],
+      "ablation": {
+        "comparison": "Same cohort, split, dates, thresholds, NLP and rules; only the anomaly contribution is disabled.",
+        "rulesOnly": {
+          "precision": null,
+          "recall": 0.175,
+          "f1": null,
+          "meanLeadDays": 2,
+          "meanOnsetDetectionDelayDays": 8,
+          "detectedCases": 4,
+          "totalCases": 4
+        },
+        "rulesPlusModel": {
+          "precision": null,
+          "recall": 0.338,
+          "f1": null,
+          "meanLeadDays": 3.3,
+          "meanOnsetDetectionDelayDays": 6.8,
+          "detectedCases": 4,
+          "totalCases": 4
+        }
+      },
+      "clinicalPerformance": {
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "specificity": null,
+        "reason": "Synthetic positive scenarios are partial; unlabelled days are not confirmed negatives."
+      }
+    },
+    {
+      "strategy": "stratified-v1",
+      "splitSeed": 104,
+      "cohortSeed": 1042028,
+      "split": {
+        "strategy": "stratified-v1",
+        "seed": 104,
+        "fitIds": [
+          "S001",
+          "S002",
+          "S004",
+          "S005",
+          "S007",
+          "S008",
+          "S009",
+          "S011",
+          "S012",
+          "S013",
+          "S014",
+          "S020",
+          "S021",
+          "S022",
+          "S024",
+          "S026",
+          "S027",
+          "S031",
+          "S032",
+          "S033",
+          "S034",
+          "S035",
+          "S036",
+          "S037",
+          "S039",
+          "S040",
+          "S042",
+          "S043",
+          "S044",
+          "S045",
+          "S046",
+          "S047",
+          "S049",
+          "S050",
+          "S051",
+          "S053",
+          "S054",
+          "S058",
+          "S060",
+          "S061",
+          "S062",
+          "S064",
+          "S068",
+          "S069",
+          "S070",
+          "S071",
+          "S072",
+          "S074",
+          "S075",
+          "S081",
+          "S083",
+          "S084",
+          "S085",
+          "S087",
+          "S088",
+          "S089",
+          "S090",
+          "S091",
+          "S096",
+          "S097",
+          "S100",
+          "S101",
+          "S102",
+          "S103",
+          "S106",
+          "S107",
+          "S108",
+          "S109",
+          "S110",
+          "S112",
+          "S115",
+          "S116",
+          "S119",
+          "S121",
+          "S122",
+          "S123",
+          "S125",
+          "S126",
+          "S127",
+          "S128",
+          "S129",
+          "S130",
+          "S131",
+          "S134",
+          "S136",
+          "S139",
+          "S141",
+          "S142",
+          "S143",
+          "S144",
+          "S146",
+          "S147",
+          "S148",
+          "S150",
+          "S153",
+          "S155",
+          "S156",
+          "S159",
+          "S160",
+          "S163",
+          "S166",
+          "S168",
+          "S170",
+          "S171",
+          "S173",
+          "S175",
+          "S179",
+          "S180",
+          "S182",
+          "S183",
+          "S187",
+          "S188",
+          "S190",
+          "S191",
+          "S192",
+          "S193",
+          "S194",
+          "S195",
+          "S198",
+          "S199"
+        ],
+        "calibrationIds": [
+          "S006",
+          "S010",
+          "S015",
+          "S017",
+          "S019",
+          "S030",
+          "S052",
+          "S063",
+          "S067",
+          "S077",
+          "S080",
+          "S092",
+          "S093",
+          "S094",
+          "S095",
+          "S098",
+          "S099",
+          "S104",
+          "S111",
+          "S113",
+          "S124",
+          "S135",
+          "S154",
+          "S164",
+          "S165",
+          "S167",
+          "S169",
+          "S174",
+          "S186",
+          "S196"
+        ],
+        "evaluationIds": [
+          "S003",
+          "S016",
+          "S018",
+          "S023",
+          "S025",
+          "S028",
+          "S029",
+          "S038",
+          "S041",
+          "S048",
+          "S055",
+          "S056",
+          "S057",
+          "S059",
+          "S065",
+          "S066",
+          "S073",
+          "S076",
+          "S078",
+          "S079",
+          "S082",
+          "S086",
+          "S105",
+          "S114",
+          "S117",
+          "S118",
+          "S120",
+          "S132",
+          "S133",
+          "S137",
+          "S138",
+          "S140",
+          "S145",
+          "S149",
+          "S151",
+          "S152",
+          "S157",
+          "S158",
+          "S161",
+          "S162",
+          "S172",
+          "S176",
+          "S177",
+          "S178",
+          "S181",
+          "S184",
+          "S185",
+          "S189",
+          "S197",
+          "S200"
+        ],
+        "strata": [
+          {
+            "key": "female|60-69|diabetes-history",
+            "total": 3,
+            "fit": 1,
+            "calibration": 1,
+            "evaluation": 1
+          },
+          {
+            "key": "female|60-69|no-diabetes-history",
+            "total": 29,
+            "fit": 18,
+            "calibration": 4,
+            "evaluation": 7
+          },
+          {
+            "key": "female|70-79|diabetes-history",
+            "total": 4,
+            "fit": 2,
+            "calibration": 1,
+            "evaluation": 1
+          },
+          {
+            "key": "female|70-79|no-diabetes-history",
+            "total": 32,
+            "fit": 19,
+            "calibration": 5,
+            "evaluation": 8
+          },
+          {
+            "key": "female|80-plus|diabetes-history",
+            "total": 3,
+            "fit": 2,
+            "calibration": 0,
+            "evaluation": 1
+          },
+          {
+            "key": "female|80-plus|no-diabetes-history",
+            "total": 29,
+            "fit": 18,
+            "calibration": 4,
+            "evaluation": 7
+          },
+          {
+            "key": "male|60-69|diabetes-history",
+            "total": 14,
+            "fit": 9,
+            "calibration": 2,
+            "evaluation": 3
+          },
+          {
+            "key": "male|60-69|no-diabetes-history",
+            "total": 14,
+            "fit": 8,
+            "calibration": 2,
+            "evaluation": 4
+          },
+          {
+            "key": "male|70-79|diabetes-history",
+            "total": 21,
+            "fit": 13,
+            "calibration": 3,
+            "evaluation": 5
+          },
+          {
+            "key": "male|70-79|no-diabetes-history",
+            "total": 18,
+            "fit": 10,
+            "calibration": 3,
+            "evaluation": 5
+          },
+          {
+            "key": "male|80-plus|diabetes-history",
+            "total": 20,
+            "fit": 12,
+            "calibration": 3,
+            "evaluation": 5
+          },
+          {
+            "key": "male|80-plus|no-diabetes-history",
+            "total": 13,
+            "fit": 8,
+            "calibration": 2,
+            "evaluation": 3
+          }
+        ]
+      },
+      "profiles": {
+        "fit": {
+          "identities": 120,
+          "gender": {
+            "Female": 60,
+            "Male": 60
+          },
+          "ageBands": {
+            "60-69": 36,
+            "80+": 40,
+            "70-79": 44
+          },
+          "diabetesHistory": 39
+        },
+        "calibration": {
+          "identities": 30,
+          "gender": {
+            "Male": 15,
+            "Female": 15
+          },
+          "ageBands": {
+            "70-79": 12,
+            "60-69": 9,
+            "80+": 9
+          },
+          "diabetesHistory": 10
+        },
+        "evaluation": {
+          "identities": 50,
+          "gender": {
+            "Female": 25,
+            "Male": 25
+          },
+          "ageBands": {
+            "70-79": 19,
+            "80+": 16,
+            "60-69": 15
+          },
+          "diabetesHistory": 16
+        }
+      },
+      "calibration": {
+        "fitIdentities": 120,
+        "calibrationIdentities": 30,
+        "evaluationIdentities": 50,
+        "splitStrategy": "stratified-v1",
+        "splitSeed": 104,
+        "samples": 415,
+        "quantile": 0.975,
+        "threshold": 0.605334067208791,
+        "observedTailFraction": 0.024096385542168676,
+        "method": "Separate development identities, baseline windows only; descriptive calibration, not a medical false-positive rate."
+      },
+      "thresholds": [
+        {
+          "threshold": 30,
+          "seniorDays": 3000,
+          "flags": 136,
+          "unlabelledFlags": 105,
+          "unknown": 11,
+          "annotatedDays": 40,
+          "coveredDays": 31,
+          "cases": [
+            {
+              "seniorId": "S003",
+              "pattern": "multisignal",
+              "onsetDate": "2026-09-12",
+              "firstFlagDate": "2026-09-15",
+              "delayAfterOnsetDays": 3
+            },
+            {
+              "seniorId": "S016",
+              "pattern": "mobility",
+              "onsetDate": "2026-10-16",
+              "firstFlagDate": "2026-10-19",
+              "delayAfterOnsetDays": 3
+            }
+          ],
+          "detectedCases": 2,
+          "totalCases": 2,
+          "dailyScenarioCoverage": 0.775,
+          "flaggedDaysPer100SeniorDays": 4.533,
+          "meanDelayAfterOnsetDays": 3
+        },
+        {
+          "threshold": 60,
+          "seniorDays": 3000,
+          "flags": 105,
+          "unlabelledFlags": 93,
+          "unknown": 11,
+          "annotatedDays": 40,
+          "coveredDays": 12,
+          "cases": [
+            {
+              "seniorId": "S003",
+              "pattern": "multisignal",
+              "onsetDate": "2026-09-12",
+              "firstFlagDate": "2026-09-18",
+              "delayAfterOnsetDays": 6
+            },
+            {
+              "seniorId": "S016",
+              "pattern": "mobility",
+              "onsetDate": "2026-10-16",
+              "firstFlagDate": "2026-10-19",
+              "delayAfterOnsetDays": 3
+            }
+          ],
+          "detectedCases": 2,
+          "totalCases": 2,
+          "dailyScenarioCoverage": 0.3,
+          "flaggedDaysPer100SeniorDays": 3.5,
+          "meanDelayAfterOnsetDays": 4.5
+        }
+      ],
+      "subgroups": [
+        {
+          "group": "gender:Female",
+          "identities": 25,
+          "seniorDays": 1500,
+          "reviewFlags": 103,
+          "highFlags": 85,
+          "annotatedDays": 28,
+          "reviewCoveredDays": 22,
+          "highCoveredDays": 9
+        },
+        {
+          "group": "age:70-79",
+          "identities": 19,
+          "seniorDays": 1140,
+          "reviewFlags": 55,
+          "highFlags": 41,
+          "annotatedDays": 28,
+          "reviewCoveredDays": 22,
+          "highCoveredDays": 9
+        },
+        {
+          "group": "diabetes-history:not-recorded",
+          "identities": 34,
+          "seniorDays": 2040,
+          "reviewFlags": 132,
+          "highFlags": 105,
+          "annotatedDays": 40,
+          "reviewCoveredDays": 31,
+          "highCoveredDays": 12
+        },
+        {
+          "group": "gender:Male",
+          "identities": 25,
+          "seniorDays": 1500,
+          "reviewFlags": 33,
+          "highFlags": 20,
+          "annotatedDays": 12,
+          "reviewCoveredDays": 9,
+          "highCoveredDays": 3
+        },
+        {
+          "group": "age:80+",
+          "identities": 16,
+          "seniorDays": 960,
+          "reviewFlags": 59,
+          "highFlags": 45,
+          "annotatedDays": 12,
+          "reviewCoveredDays": 9,
+          "highCoveredDays": 3
+        },
+        {
+          "group": "diabetes-history:recorded",
+          "identities": 16,
+          "seniorDays": 960,
+          "reviewFlags": 4,
+          "highFlags": 0,
+          "annotatedDays": 0,
+          "reviewCoveredDays": 0,
+          "highCoveredDays": 0
+        },
+        {
+          "group": "age:60-69",
+          "identities": 15,
+          "seniorDays": 900,
+          "reviewFlags": 22,
+          "highFlags": 19,
+          "annotatedDays": 0,
+          "reviewCoveredDays": 0,
+          "highCoveredDays": 0
+        }
+      ],
+      "ablation": {
+        "comparison": "Same cohort, split, dates, thresholds, NLP and rules; only the anomaly contribution is disabled.",
+        "rulesOnly": {
+          "precision": null,
+          "recall": 0.275,
+          "f1": null,
+          "meanLeadDays": 5.5,
+          "meanOnsetDetectionDelayDays": 4.5,
+          "detectedCases": 2,
+          "totalCases": 2
+        },
+        "rulesPlusModel": {
+          "precision": null,
+          "recall": 0.3,
+          "f1": null,
+          "meanLeadDays": 5.5,
+          "meanOnsetDetectionDelayDays": 4.5,
+          "detectedCases": 2,
+          "totalCases": 2
+        }
+      },
+      "clinicalPerformance": {
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "specificity": null,
+        "reason": "Synthetic positive scenarios are partial; unlabelled days are not confirmed negatives."
+      }
+    }
+  ],
+  "limitations": [
+    "All records and scenarios are synthetic, with no independent clinical outcomes.",
+    "A representative profile mix does not establish representative clinical outcomes or calibrated precision.",
+    "Different split strategies evaluate different seniors/cases; their coverage cannot be read as a performance gain.",
+    "The fixed representative split has only two authored scenarios; repeated generator seeds preserve those case identities and are not independent cases.",
+    "Daily observations are correlated. Unlabelled flags measure workload and cannot establish false alarms."
+  ],
+  "historicalComparison": {
+    "before": {
+      "modelVersion": "personal-risk-v2",
+      "sourceSha256": "ed8f28cefc629ef01887cd5a541758debdf9f42951cdd917a0fb1570bffff61d",
+      "thresholds": [
+        {
+          "threshold": 30,
+          "coveredScenarioDays": 46,
+          "scenarioDays": 80,
+          "dailyScenarioCoverage": 0.575,
+          "detectedCases": 4,
+          "totalCases": 4,
+          "meanDelayAfterOnsetDays": 3.75,
+          "flaggedDaysPer100SeniorDays": 3.233,
+          "unlabelledFlaggedSeniorDays": 51
+        },
+        {
+          "threshold": 60,
+          "coveredScenarioDays": 17,
+          "scenarioDays": 80,
+          "dailyScenarioCoverage": 0.213,
+          "detectedCases": 3,
+          "totalCases": 4,
+          "meanDelayAfterOnsetDays": 5.67,
+          "flaggedDaysPer100SeniorDays": 2.2,
+          "unlabelledFlaggedSeniorDays": 49
+        }
+      ]
+    },
+    "after": [
+      {
+        "threshold": 30,
+        "seniorDays": 3000,
+        "flags": 109,
+        "unlabelledFlags": 58,
+        "unknown": 19,
+        "annotatedDays": 80,
+        "coveredDays": 51,
+        "cases": [
+          {
+            "seniorId": "S004",
+            "pattern": "multisignal",
+            "onsetDate": "2026-09-15",
+            "firstFlagDate": "2026-09-19",
+            "delayAfterOnsetDays": 4
+          },
+          {
+            "seniorId": "S008",
+            "pattern": "medication",
+            "onsetDate": "2026-10-16",
+            "firstFlagDate": "2026-10-19",
+            "delayAfterOnsetDays": 3
+          },
+          {
+            "seniorId": "S012",
+            "pattern": "appetite",
+            "onsetDate": "2026-09-15",
+            "firstFlagDate": "2026-09-18",
+            "delayAfterOnsetDays": 3
+          },
+          {
+            "seniorId": "S016",
+            "pattern": "mobility",
+            "onsetDate": "2026-10-16",
+            "firstFlagDate": "2026-10-19",
+            "delayAfterOnsetDays": 3
+          }
+        ],
+        "detectedCases": 4,
+        "totalCases": 4,
+        "dailyScenarioCoverage": 0.638,
+        "flaggedDaysPer100SeniorDays": 3.633,
+        "meanDelayAfterOnsetDays": 3.25
+      },
+      {
+        "threshold": 60,
+        "seniorDays": 3000,
+        "flags": 71,
+        "unlabelledFlags": 49,
+        "unknown": 19,
+        "annotatedDays": 80,
+        "coveredDays": 22,
+        "cases": [
+          {
+            "seniorId": "S004",
+            "pattern": "multisignal",
+            "onsetDate": "2026-09-15",
+            "firstFlagDate": "2026-09-21",
+            "delayAfterOnsetDays": 6
+          },
+          {
+            "seniorId": "S008",
+            "pattern": "medication",
+            "onsetDate": "2026-10-16",
+            "firstFlagDate": "2026-10-24",
+            "delayAfterOnsetDays": 8
+          },
+          {
+            "seniorId": "S012",
+            "pattern": "appetite",
+            "onsetDate": "2026-09-15",
+            "firstFlagDate": "2026-09-30",
+            "delayAfterOnsetDays": 15
+          },
+          {
+            "seniorId": "S016",
+            "pattern": "mobility",
+            "onsetDate": "2026-10-16",
+            "firstFlagDate": "2026-10-19",
+            "delayAfterOnsetDays": 3
+          }
+        ],
+        "detectedCases": 4,
+        "totalCases": 4,
+        "dailyScenarioCoverage": 0.275,
+        "flaggedDaysPer100SeniorDays": 2.367,
+        "meanDelayAfterOnsetDays": 8
+      }
+    ],
+    "meaning": "The earlier v2 snapshot and current legacy-modulo run retain the same cohort, identity roles and numeric thresholds. New language rules change cue features and refit/calibrate the forest. An average delay among detected cases is not directly comparable when the detected-case set changes."
+  }
+}
