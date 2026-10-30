@@ -1,0 +1,69 @@
+/* Senior and family actions prioritize clear labels and comfortable touch targets. */
+.portal-care { gap: 22px; }
+.portal-care .page-intro h1 { color: #294a38; font-size: clamp(27px,3vw,34px); letter-spacing: -1px; }
+.portal-care .page-intro p { max-width: 680px; color: #5f7467; font-size: 14px; line-height: 1.75; }
+.portal-care .eyebrow { color: #657d69; font-size: 10px; }
+.portal-toolbar { padding: 14px 16px; border: 1px solid #e2e9df; border-radius: 13px; background: #fffefa; }
+.portal-toolbar label { gap: 8px; color: #405d49; font-size: 13px; }
+.portal-toolbar input,.portal-toolbar select { min-height: 44px; }
+.portal-toolbar > span { color: #5f7467; font-size: 12px; }
+.portal-care .button { min-height: 44px; border-radius: 10px; font-size: 13px; }
+.portal-care .button.small { min-height: 40px; font-size: 12px; }
+.portal-care h2 { color: #2e4d3a; font-size: 20px; }
+.portal-care p { color: #5f7467; font-size: 13px; line-height: 1.7; }
+.portal-form,.portal-checkin,.portal-history,.portal-request,.portal-empty,.portal-legacy { border-radius: 15px; box-shadow: 0 7px 22px rgba(39,61,46,.04); }
+.portal-form { padding: 26px; gap: 19px; }
+.portal-care label { color: #405c49; font-size: 13px; line-height: 1.5; }
+.portal-care input:not([type=radio]),.portal-care select,.portal-care textarea { min-height: 46px; border-color: #dce5da; border-radius: 10px; color: #2f4b3b; font-size: 14px; }
+.portal-care textarea { min-height: 100px; }
+.portal-filter { flex-wrap: wrap; gap: 8px; }
+.portal-request-list { gap: 13px; }
+.portal-request { padding: 22px; border-left-width: 4px; }
+.portal-request-heading h2 { color: #2d4b39; font-size: 18px; line-height: 1.5; }
+.portal-request-heading p,.portal-request-meta { color: #62766a; font-size: 12px; line-height: 1.7; }
+.portal-pill { padding: 6px 11px; border-radius: 999px; font-size: 11px; }
+.portal-response { padding: 18px; border: 1px solid #e2e9df; border-radius: 12px; background: #f8faf6; }
+.portal-response button { min-height: 44px; }
+.portal-checkin { padding: 28px; }
+.portal-checkin-heading { margin-bottom: 17px; }
+.portal-checkin-heading > div { max-width: 680px; }
+.portal-checkin-heading h2 { color: #2d503b; font-size: 22px; }
+.portal-checkin-heading p { color: #5e7366; font-size: 13px; line-height: 1.75; }
+.portal-checkin-heading label { min-width: 140px; }
+.portal-checkin fieldset { padding: 20px 0 16px; border-color: #e2e9df; }
+.portal-checkin legend { color: #365640; font-size: 15px; line-height: 1.6; }
+.portal-checkin fieldset > div { gap: 9px; }
+.portal-checkin fieldset label { min-height: 58px; padding: 14px; border-radius: 11px; color: #465e4c; background: #fffefa; font-size: 13px; line-height: 1.55; }
+.portal-checkin fieldset label:hover { border-color: #93ad8e; background: #f8faf5; }
+.portal-checkin fieldset label.selected { color: #31583e; border-color: #658c6d; background: #eef5e9; box-shadow: 0 0 0 1px #658c6d; }
+.portal-checkin input[type=radio] { width: 20px; height: 20px; }
+.portal-note { margin: 17px 0; }
+.portal-checkin > button { min-height: 48px; padding-inline: 18px; }
+.portal-help { max-width: 760px; color: #66796c !important; font-size: 11px !important; line-height: 1.7 !important; }
+.portal-history { padding: 24px; }
+.portal-history h2 { margin-bottom: 12px; }
+.portal-history article { padding: 16px 0; border-color: #e5ebe3; }
+.portal-history article > div strong { color: #355541; font-size: 13px; }
+.portal-history article > div span { color: #6a7c70; font-size: 11px; }
+.portal-history article > p { margin-top: 8px; font-size: 13px; }
+.portal-saved { border: 1px solid #d8e8d7; color: #315b3e !important; }
+.portal-error { align-items: center; gap: 15px; border-radius: 11px; font-size: 13px; line-height: 1.6; }
+.portal-error button { min-height: 40px; padding: 8px 12px; }
+.portal-empty { padding: 32px 24px; }
+.portal-empty h2 { margin-bottom: 8px; }
+.portal-care :is(button,input,select,textarea):focus-visible { outline: 3px solid #92b18a; outline-offset: 2px; }
+
+@media (max-width: 640px) {
+  .portal-care { gap: 17px; }
+  .portal-toolbar { align-items: stretch; gap: 10px; padding: 14px; }
+  .portal-toolbar label { width: 100%; }
+  .portal-toolbar > span { margin-left: 0; padding: 4px 2px; }
+  .portal-form,.portal-checkin,.portal-history { padding: 18px; }
+  .portal-request { padding: 17px; }
+  .portal-request-heading { gap: 12px; }
+  .portal-request-heading > .button { width: 100%; }
+  .portal-checkin-heading { gap: 14px; }
+  .portal-checkin fieldset label { min-height: 56px; }
+  .portal-checkin > button { width: 100%; }
+  .portal-error { align-items: flex-start; }
+}

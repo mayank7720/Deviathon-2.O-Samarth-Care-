@@ -1,11 +1,21 @@
 "use client";
 import AccountConsole from './components/AccountConsole';
 import AccountSettings from './components/AccountSettings';
+import CareMark from './components/CareMark';
+import PhoneSupport, {PhoneSupportNotice,CarePhoneContact} from './components/PhoneSupport';
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import Link from './components/WorkspaceLink';
+import {usePathname,useRouter} from 'next/navigation';
+import {siteRoute,workspacePath,defaultWorkspace,canOpenWorkspace} from '../lib/site-links.mjs';
 import AccessPortal, { type AccessState } from "./components/AccessPortal";
 import DeliveryCenter, { RuntimeControls } from "./components/DeliveryCenter";
 import GroundedReports from './components/GroundedReports';
+import SharedSummaryHistory from './components/SharedSummaryHistory';
+import CareReviewNav from './components/CareReviewNav';
+import {workspaceNavigation} from '../lib/workspace-navigation.mjs';
+import dynamic from 'next/dynamic';
+const CareMonitoring=dynamic(()=>import('./components/CareMonitoring'),{ssr:false});
 import MotionCheckin from './components/MotionCheckin';
 import TelephonyCenter from './components/TelephonyCenter';
 import CareOperations from './components/CareOperations';
@@ -28,6 +38,9 @@ type View =
   | "insights"
   | "family"
   | "analysis"
+  | "monitoring"
+  | "medications"
+  | "family-reports"
   | "alerts"
   | "communications"
   | "access"
@@ -39,7 +52,8 @@ type View =
   | "followups"
   | "household"
   | "system"
-  | "account";
+  | "account"
+  | "phone-support";
 type Role = "coordinator" | "operations" | "family" | "senior";
 type Senior = any;
 type Snapshot = {
@@ -425,8 +439,8 @@ function CareWorkspace({
   auth: AccessState;
   onExit: () => Promise<void>;
 }) {
+  const router=useRouter(),pathname=usePathname(),requestedView=siteRoute(pathname||'/').view;
   const [data, setData] = useState<Snapshot | null>(null),
-    [view, setView] = useState<View>("dashboard"),
     [error, setError] = useState(""),
     [search, setSearch] = useState(""),
     [riskFilter, setRiskFilter] = useState("all"),
@@ -445,6 +459,45 @@ function CareWorkspace({
     [taskOutcome, setTaskOutcome] = useState("");
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const detailRequest = useRef(0);
+  const navigationRef = useRef<HTMLElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const phone = window.matchMedia('(max-width: 600px)');
+    if (!phone.matches) return;
+    const overflow = document.body.style.overflow;
+    const menuButton = menuButtonRef.current;
+    document.body.style.overflow = 'hidden';
+    navigationRef.current?.querySelector<HTMLElement>('button')?.focus();
+    function keyboard(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setMobileOpen(false);
+      }
+      if (event.key !== 'Tab') return;
+      const controls = Array.from(navigationRef.current?.querySelectorAll<HTMLElement>('a[href],button:not([disabled])') || []);
+      const first = controls[0], last = controls.at(-1);
+      if (!first || !last) return;
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+    function resize(event: MediaQueryListEvent) {
+      if (!event.matches) setMobileOpen(false);
+    }
+    document.addEventListener('keydown', keyboard);
+    phone.addEventListener('change', resize);
+    return () => {
+      document.body.style.overflow = overflow;
+      document.removeEventListener('keydown', keyboard);
+      phone.removeEventListener('change', resize);
+      if (phone.matches && menuButton?.isConnected) menuButton.focus();
+    };
+  }, [mobileOpen]);
   function notify(message: string) {
     setToast(message);
     if (toastTimer.current) clearTimeout(toastTimer.current);
@@ -469,18 +522,16 @@ function CareWorkspace({
     }
   }
   useEffect(() => {
-    load().then((result) => {
-      if (result?.session?.role === "family") setView("family");
-      if (result?.session?.role === "senior") setView("checkin");
-      if (result?.session?.role === "operations") setView("insights");
-    });
+    void load();
     return () => {
       if (toastTimer.current) clearTimeout(toastTimer.current);
     };
   }, []);
-  const role = data?.session?.role || "coordinator",
+  const role:Role = data?.session?.role || (auth.session?.role as Role) || 'coordinator',
     staff = role === "coordinator" || role === "operations",
     canWrite = role === "coordinator" || role === 'operations' && data?.session?.isAdmin === true;
+  const view=(canOpenWorkspace(requestedView,role,data?.session?.isAdmin===true)?requestedView:defaultWorkspace(role)) as View;
+  useEffect(()=>{if(data&&requestedView!==view)router.replace(workspacePath(view));},[data,requestedView,view,router]);
   const seniors = data?.seniors || [],
     tasks = data?.tasks || [],
     stats = data?.stats || {},
@@ -562,63 +613,22 @@ function CareWorkspace({
     }
   }
   function navigate(next: View) {
-    setView(next);
+    window.history.pushState(null,'',workspacePath(next));
+    window.scrollTo({top:0,behavior:'instant'});
     setSearch("");
     setMobileOpen(false);
   }
-  const nav = staff
-    ? [
-        { id: "dashboard", label: "Care overview", icon: "grid" },
-        { id: "seniors", label: "My seniors", icon: "people" },
-        ...(canWrite
-          ? [{ id: "checkin", label: "Record a check-in", icon: "phone" }]
-          : []),
-        { id: "analysis", label: "Personal analysis", icon: "heart" },
-        { id: "reports", label: "Evidence & reports", icon: "note" },
-        { id: "alerts", label: "Alert inbox", icon: "bell" },
-        { id: "followups", label: "Follow-ups", icon: "calendar" },
-        { id: "care-operations", label: "Care assignments", icon: "people" },
-        { id: "communications", label: "Care conversations", icon: "phone" },
-        { id: "telephony", label: "Phone & SMS", icon: "phone" },
-        { id: "speech", label: "Voice notes & transcripts", icon: "note" },
-        { id: "deliveries", label: "Notification center", icon: "bell" },
-        { id: "insights", label: "Insights & outcomes", icon: "chart" },
-        ...(data?.session?.role === 'operations' && data?.session?.isAdmin
-          ? [{ id: "access", label: "Accounts & invitations", icon: "shield" }, { id: "system", label: "Cloud & integrations", icon: "grid" }]
-          : []),
-      ]
-    : role === "family"
-      ? [
-          { id: "family", label: "Family wellbeing", icon: "heart" },
-          { id: "followups", label: "Follow-ups", icon: "calendar" },
-          { id: "checkin", label: "Share a wellbeing update", icon: "note" },
-          { id: "household", label: "Family & senior access", icon: "people" },
-          { id: "communications", label: "Care conversations", icon: "phone" },
-          { id: "deliveries", label: "Notification center", icon: "bell" },
-          { id: "alerts", label: "Care updates", icon: "bell" },
-        ]
-      : [
-          { id: "checkin", label: "My wellbeing check-in", icon: "heart" },
-          { id: "followups", label: "My follow-ups", icon: "calendar" },
-          { id: "household", label: "Family access", icon: "people" },
-          {
-            id: "communications",
-            label: "Talk to my care team",
-            icon: "phone",
-          },
-          { id: "alerts", label: "My care updates", icon: "bell" },
-          { id: "deliveries", label: "Notification center", icon: "bell" },
-        ];
-  nav.push({id:'account',label:'My account & security',icon:'shield'});
+  const navGroups=workspaceNavigation(role,data?.session?.isAdmin===true,canWrite);
+  const nav=navGroups.flatMap(group=>group.items);
   const activeTitle = nav.find((n) => n.id === view)?.label || "Care overview";
   const effectiveSenior = detail?.senior || selected;
   if (!data)
     return (
       <div className="loading-screen">
         <div className="loading-brand">
-          <Icon name="leaf" size={34} />
+          <CareMark size={34} />
           <span>
-            samarth<span className="brand-dot">.</span>
+            SwasthSync
           </span>
         </div>
         <p>
@@ -646,65 +656,43 @@ function CareWorkspace({
         <button
           className="sidebar-scrim"
           aria-label="Close navigation"
+          aria-hidden="true"
+          tabIndex={-1}
           onClick={() => setMobileOpen(false)}
         />
       )}
-      <aside className={`sidebar ${mobileOpen ? "is-open" : ""}`}>
-        <a
+      <aside id="workspace-navigation" ref={navigationRef} className={`sidebar ${mobileOpen ? "is-open" : ""}`} role={mobileOpen ? 'dialog' : undefined} aria-modal={mobileOpen || undefined} aria-label="Workspace navigation">
+        <button className="icon-button mobile-nav-close" aria-label="Close navigation" onClick={() => setMobileOpen(false)}><Icon name="close"/></button>
+        <Link
           className="brand"
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            navigate(nav[0].id as View);
-          }}
+          href={workspacePath(defaultWorkspace(role))}
+          onClick={()=>{setSearch('');setMobileOpen(false);}}
         >
           <span className="brand-icon">
-            <Icon name="leaf" size={25} />
+            <CareMark size={25} />
           </span>
           <span>
-            samarth<span className="brand-dot">.</span>
+            SwasthSync
             <small>CARE, A LITTLE EARLIER</small>
           </span>
-        </a>
-        <span className="nav-heading">WORKSPACE</span>
+        </Link>
         <nav aria-label="Main navigation">
-          {nav.map((item) => (
-            <button
+          {navGroups.map(group=><section className="workspace-nav-group" key={group.label} aria-label={group.label}><h2 className="nav-heading">{group.label}</h2>{group.items.map((item) => (
+            <Link
               className={`nav-item ${view === item.id ? "active" : ""}`}
               key={item.id}
-              onClick={() => navigate(item.id as View)}
+              aria-current={view === item.id ? 'page' : undefined}
+              href={workspacePath(item.id)}
+              onClick={()=>{setSearch('');setMobileOpen(false);}}
             >
               <Icon name={item.icon} />
               <span>{item.label}</span>
               {item.id === "dashboard" && stats.high > 0 && (
                 <span className="nav-count">{stats.high}</span>
               )}
-            </button>
-          ))}
+            </Link>
+          ))}</section>)}
         </nav>
-        {canWrite && (
-          <>
-            <span className="nav-heading second">CARE CHANNELS</span>
-            <button
-              className="nav-item"
-              onClick={() => {
-                setSignalSenior(seniors[0]?.id || "");
-                setSignalOpen(true);
-              }}
-            >
-              <Icon name="note" />
-              <span>Log a signal</span>
-              <Icon name="plus" size={16} />
-            </button>
-            <button className="nav-item" onClick={() => setTaskOpen(true)}>
-              <Icon name="check" />
-              <span>Follow-ups</span>
-              {openTasks.length > 0 && (
-                <span className="nav-count muted">{openTasks.length}</span>
-              )}
-            </button>
-          </>
-        )}
         <div className="sidebar-bottom">
           <div className="privacy-note">
             <Icon name="shield" size={18} />
@@ -741,12 +729,15 @@ function CareWorkspace({
         </div>
       </aside>
 
-      <div className="main-shell">
+      <div className="main-shell" inert={mobileOpen || undefined}>
         <header className="topbar">
           <div className="breadcrumb">
             <button
               className="icon-button mobile-toggle"
-              aria-label="Open navigation"
+              ref={menuButtonRef}
+              aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'}
+              aria-expanded={mobileOpen}
+              aria-controls="workspace-navigation"
               onClick={() => setMobileOpen(true)}
             >
               <Icon name="menu" />
@@ -781,6 +772,8 @@ function CareWorkspace({
           </div>
         </header>
         <main className="main-content">
+          {staff&&view!=='phone-support'&&<PhoneSupportNotice onOpen={()=>navigate('phone-support')}/>}
+          {view==='phone-support'&&staff&&<PhoneSupport seniors={seniors} notify={notify} onChanged={load} onOpenFollowups={()=>navigate('followups')}/>}
           {error && (
             <div className="inline-error" role="alert">
               {error}
@@ -1214,7 +1207,7 @@ function CareWorkspace({
           )}
 
           {view === "checkin" && (
-            <><PortalCare mode="checkin" seniors={seniors} session={data.session} asOfDate={data.date} notify={notify} onChanged={load}/>{role==='senior'&&data.session.seniorId&&<MotionCheckin seniorId={data.session.seniorId} notify={notify} onSaved={load} />}</>
+            <>{role==='senior'&&data.session.seniorId&&<CarePhoneContact seniorId={data.session.seniorId} name={seniors.find(senior=>senior.id===data.session.seniorId)?.name||'Senior member'}/>}<PortalCare mode="checkin" seniors={seniors} session={data.session} asOfDate={data.date} notify={notify} onChanged={load}/>{role==='senior'&&data.session.seniorId&&<MotionCheckin seniorId={data.session.seniorId} notify={notify} onSaved={load} />}</>
           )}
           {view === "followups" && <PortalCare mode="followups" seniors={seniors} session={data.session} asOfDate={data.date} notify={notify} onChanged={load}/>}
           {view === "household" && ["family","senior"].includes(role) && <HouseholdAccess notify={notify} onChanged={load}/>}
@@ -1222,21 +1215,25 @@ function CareWorkspace({
           {view === "family" && (
             <FamilyView seniors={seniors} date={data.date} notify={notify}/>
           )}
+          {view==='family-reports'&&role==='family'&&<FamilyView seniors={seniors} date={data.date} notify={notify} summaryOnly/>}
           {view === "insights" && staff && (
             <>
               <OutcomesInsights data={data} seniors={data.seniors} onOpenSenior={openSenior} />
               <RuntimeControls key={`${data.runtime?.mode}:${data.date}`} data={data} notify={notify} onChanged={load} />
             </>
           )}
+          {staff&&["analysis","monitoring","medications","reports"].includes(view)&&<CareReviewNav active={view}/>}
           {view === "analysis" && staff && (
             <AnalysisView
               data={data}
               notify={notify}
               initialSenior={analysisSenior || seniors[0]?.id}
+              onSeniorChange={setAnalysisSenior}
             />
           )}
-          {view==='reports'&&staff&&<GroundedReports data={data} notify={notify} onChanged={load} onOpenDeliveries={()=>navigate('deliveries')} />}
-          {view==='telephony'&&staff&&<TelephonyCenter data={data} notify={notify} />}
+          {['monitoring','medications'].includes(view)&&staff&&<CareMonitoring key={view} initialSenior={analysisSenior} onSeniorChange={setAnalysisSenior} section={view==='medications'?'medications':'vitals'} data={data} notify={notify} onOpenFollowups={()=>navigate('followups')}/>}
+          {view==='reports'&&staff&&<GroundedReports initialSenior={analysisSenior} onSeniorChange={setAnalysisSenior} data={data} notify={notify} onChanged={load} onOpenDeliveries={()=>navigate('deliveries')} />}
+          {view==='telephony'&&staff&&<TelephonyCenter data={data} notify={notify} onOpenFollowups={()=>navigate('followups')} />}
           {view==='care-operations'&&staff&&<CareOperations data={data} notify={notify} onChanged={load} initialSenior={careOperationsSenior} />}
           {view==='speech'&&staff&&<SpeechNotes data={data} notify={notify} onChanged={load} />}
           {view === "alerts" && (
@@ -1249,7 +1246,7 @@ function CareWorkspace({
             <DeliveryCenter data={data} notify={notify} onChanged={load} />
           )}
           {view === "access" && data.session.role === 'operations' && data.session.isAdmin && (
-            <AccountConsole data={data} notify={notify} onChanged={load}/>
+            <AccountConsole data={data} notify={notify} onChanged={load} onOwnPassword={()=>navigate('account')}/>
           )}
           {view==='account'&&<AccountSettings name={data.session.name} role={{operations:'Operations Manager',coordinator:'Care Coordinator',family:'Family Member',senior:'Senior Member'}[role]}/>}
           <footer className="page-footer">
@@ -2142,15 +2139,15 @@ function SignalModal({
   );
 }
 
-function FamilyView({ seniors, date,notify }: { seniors: Senior[]; date: string;notify:(message:string)=>void }) {
+function FamilyView({ seniors, date,notify,summaryOnly=false }: { seniors: Senior[]; date: string;notify:(message:string)=>void;summaryOnly?:boolean }) {
   const [selectedSeniorId, setSelectedSeniorId] = useState("");
   const [summaryAttempt, setSummaryAttempt] = useState(0);
   const s = seniors.find((senior) => senior.id === selectedSeniorId) || seniors[0];
-  const summaryKey = s ? `${s.id}:${date}:${s.familyConsent !== false}:${summaryAttempt}` : "";
+  const summaryKey = s ? `${s.id}:${date}:${s.familyConsent !== false}` : "";
   const [weekly, setWeekly] = useState<{
     key: string;
     status: "ready" | "error" | "pending";
-    summary?: { text: string; period?: { from: string; to: string } };
+    summary?: { text: string; method?:string; period?: { from: string; to: string } };
     error?: string;
     currentPeriodPending?:boolean;
   } | null>(null);
@@ -2165,9 +2162,9 @@ function FamilyView({ seniors, date,notify }: { seniors: Senior[]; date: string;
     setRequestedSenior(s.id);notify(prior?'Your existing summary request is saved in Follow-ups.':'Summary requested. Your care team can review it in Follow-ups.');
   }catch(error:any){notify(error.message||'The summary request could not be saved.');}finally{setRequestBusy(false);}}
   useEffect(() => {
-    let active = true;
-    if (s?.id && s.familyConsent !== false)
-      api(`/summaries/${encodeURIComponent(s.id)}`)
+    let active = true,running=false;
+    function refreshSummary(){if(running||!s?.id||s.familyConsent===false)return;running=true;
+      void api(`/summaries/${encodeURIComponent(s.id)}`)
         .then((result) => {
           if (!active) return;
           if(result.status==='pending_review') {setWeekly({key:summaryKey,status:'pending'});return;}
@@ -2179,11 +2176,16 @@ function FamilyView({ seniors, date,notify }: { seniors: Senior[]; date: string;
         })
         .catch((error:any) => {
           if (active) setWeekly({ key: summaryKey, status: "error", error: error.message||"Unable to load this wellbeing summary. Try again or contact your care coordinator." });
-        });
+        }).finally(()=>{running=false;});
+    }
+    refreshSummary();
+    const timer=setInterval(()=>{if(document.visibilityState==='visible')refreshSummary();},20000);
+    window.addEventListener('focus',refreshSummary);
     return () => {
       active = false;
+      clearInterval(timer);window.removeEventListener('focus',refreshSummary);
     };
-  }, [s?.id, s?.familyConsent, summaryKey]);
+  }, [s?.id, s?.familyConsent, summaryKey,summaryAttempt]);
   const coordinatorName = typeof s?.coordinator === "string" && s.coordinator.trim()
     ? s.coordinator
     : "Your care coordinator";
@@ -2194,8 +2196,8 @@ function FamilyView({ seniors, date,notify }: { seniors: Senior[]; date: string;
       <section className="page-intro">
         <div>
           <span className="eyebrow">FAMILY</span>
-          <h1>Wellbeing updates</h1>
-          <p>Updates shared by your family’s care team.</p>
+          <h1>{summaryOnly?'Weekly summaries':'Family overview'}</h1>
+          <p>Updates shared by your family’s care team after review.</p>
         </div>
         <span className="date-tag">
           <Icon name="calendar" size={17} />
@@ -2216,6 +2218,8 @@ function FamilyView({ seniors, date,notify }: { seniors: Senior[]; date: string;
           </label>
         </section>
       )}
+      {s&&s.familyConsent!==false&&<CarePhoneContact seniorId={s.id} name={s.name}/>}
+      {s&&s.familyConsent!==false&&<div className="family-summary-toolbar"><button className="button secondary" onClick={()=>setSummaryAttempt(n=>n+1)}>Refresh weekly update</button><span>Approved updates refresh automatically while this page is open.</span></div>}
       {!s || s.familyConsent === false ? (
         <section className="panel consent-empty">
           <Icon name="shield" size={45} />
@@ -2226,7 +2230,7 @@ function FamilyView({ seniors, date,notify }: { seniors: Senior[]; date: string;
           </p>
         </section>
       ) : (
-        <div className="family-layout">
+        <div className={summaryOnly?'family-reports-layout':'family-layout'}>
           <section className="panel family-summary" aria-busy={!currentWeekly}>
             <div className="family-summary-head">
               <Avatar senior={s} large />
@@ -2258,7 +2262,7 @@ function FamilyView({ seniors, date,notify }: { seniors: Senior[]; date: string;
                         ? "Recent entries are close to the usual routine."
                         : "A check-in will help fill in the picture."}
                 </h3>
-                {currentWeekly?.status === "ready" && <p>{currentWeekly.summary?.text}</p>}
+                {currentWeekly?.status === "ready" && <><p>{currentWeekly.summary?.text}</p><p className="subtle-note">{currentWeekly.summary?.method||'Reviewed care-team update'}</p></>}
                 {currentWeekly?.status==='pending'&&<p role="status">Your care team has not shared an approved weekly update for this period yet.</p>}
                 {(currentWeekly?.status==='pending'||currentWeekly?.currentPeriodPending)&&<div><p className="subtle-note">{currentWeekly?.currentPeriodPending?'This is the latest approved update. A newer update can be requested.':'Your coordinator reviews generated summaries before sharing them.'}</p><button className="button secondary" disabled={requestBusy||requestedSenior===s.id} onClick={requestSummary}>{requestBusy?'Saving request…':requestedSenior===s.id?'Summary request saved':'Request weekly update'}</button></div>}
                 {!currentWeekly && <p role="status" aria-live="polite">Loading wellbeing summary…</p>}
@@ -2295,7 +2299,7 @@ function FamilyView({ seniors, date,notify }: { seniors: Senior[]; date: string;
               </p>
             </div>
           </section>
-          <aside className="panel family-side">
+          {!summaryOnly&&<aside className="panel family-side">
             <span className="eyebrow">CARE TEAM</span>
             <span className="family-coordinator-avatar">{coordinatorInitials}</span>
             <h3>{coordinatorName}</h3>
@@ -2310,9 +2314,10 @@ function FamilyView({ seniors, date,notify }: { seniors: Senior[]; date: string;
             <span className="subtle-note">
               Wellbeing signals support human review and are not a diagnosis.
             </span>
-          </aside>
+          </aside>}
         </div>
       )}
+      {summaryOnly&&s&&s.familyConsent!==false&&<SharedSummaryHistory seniorId={s.id}/>}
     </>
   );
 }

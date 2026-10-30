@@ -3,6 +3,7 @@
 import {useEffect,useId,useMemo,useRef,useState} from 'react';
 import type {FormEvent} from 'react';
 import './history-timeline.css';
+import './history-timeline-modern.css';
 
 type Props={seniorId:string;asOfDate:string;cohortStart?:string;cohortEnd?:string;refreshKey?:number};
 type Period='day'|'week'|'month'|'90days'|'custom';

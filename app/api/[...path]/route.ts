@@ -1,11 +1,11 @@
-import { serverRuntime } from "@/lib/server-runtime.mjs";
+import { serverRuntime,normalizeNodeRequest } from "@/lib/server-runtime.mjs";
 import { handleApi } from "../../../lib/api.mjs";
 import { showcaseEnvironment } from "../../../lib/model-runtime.mjs";
 
 export const dynamic = "force-dynamic";
 function route(request: Request) {
   const { env, db, local } = serverRuntime();
-  return handleApi(request, db, {
+  return handleApi(normalizeNodeRequest(request), db, {
     local,
     env:showcaseEnvironment(env),
   });

@@ -1,22 +1,86 @@
-"use client";
-import {useEffect,useState} from 'react';
-import Link from 'next/link';
-import '../components/care-extensions.css';
-import '../components/grounded-reports.css';
-type Reason={title:string;detail:string};
-type Senior={id:string;name:string;age:number;city:string;score:number|null;level:string;urgency:string;action:string;confidence:number;reasons:Reason[]};
-type Demo={date:string;seniors:Senior[];reports:Record<string,{text:string;method:string;evidence:{id:string;date:string}[]}>;provenance:{actualObservations:number;reference:{source:{url?:string};basis:string}};quality:{passed:boolean};metrics:{scenarioReviewCoverage?:{detectedCases:number;totalCases:number;dailyCoverage:number;meanOnsetDetectionDelayDays:number};methodology:string}};
-export default function PublicDemo(){
- const [data,setData]=useState<Demo|null>(null),[selected,setSelected]=useState(''),[query,setQuery]=useState(''),[error,setError]=useState('');
- useEffect(()=>{let alive=true;fetch('/showcase-data.json').then(async r=>{if(!r.ok)throw Error('The public showcase snapshot is unavailable.');return await r.json() as Demo;}).then(value=>{if(alive){setData(value);setSelected(value.seniors[0]?.id||'');}}).catch(reason=>setError(reason.message));return()=>{alive=false;};},[]);
- const senior=data?.seniors.find(s=>s.id===selected),report=selected?data?.reports[selected]:null;
- return <main className="public-showcase" style={{maxWidth:1280,margin:'auto',padding:'28px clamp(16px,4vw,48px)'}}>
-  <nav style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:40}}><Link href="/" className="brand" style={{color:'#183e35'}}>samarth.</Link><Link className="button secondary" href="/">Sign in to care workspace</Link></nav>
-  <section className="page-intro"><div><span className="eyebrow">PUBLIC DEVIATHON SHOWCASE</span><h1>Small changes. Evidence you can inspect.</h1><p>Explore 200 fictional seniors and 90 days of reference-informed signals. This public tour is read-only and contains no private workspace records.</p></div></section>
-  {error&&<p role="alert">{error}</p>}{!data&&!error&&<p>Loading the reproducible care scenarios…</p>}
-  {data&&<><section className="panel extension-panel"><strong>Data through {data.date} · {data.provenance.actualObservations.toLocaleString()} recorded synthetic days</strong><p>{data.provenance.reference.basis}</p><p>Structural consistency checks: {data.quality.passed?'passed':'review required'}. Clinical accuracy is not established. Unlabelled days are not assumed healthy, so clinical precision and F1 are not estimable.</p>{data.metrics.scenarioReviewCoverage&&<p>Held-out authored scenarios: a coordinator review flag covered {data.metrics.scenarioReviewCoverage.detectedCases} of {data.metrics.scenarioReviewCoverage.totalCases} scenarios, averaging {data.metrics.scenarioReviewCoverage.meanOnsetDetectionDelayDays} days after authored onset. This measures the simulated scenarios only.</p>}<a href="https://synthea.mitre.org/downloads" target="_blank" rel="noreferrer">Inspect the MITRE Synthea reference source</a></section>
-  <div className="public-demo-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,340px),1fr))',gap:24,marginTop:24}}><section className="panel extension-panel"><h2>Who needs a check-in?</h2><label>Search senior or city<input aria-label="Search public demo" value={query} onChange={e=>setQuery(e.target.value)} style={{width:'100%',marginBottom:16}} /></label><div style={{maxHeight:650,overflow:'auto'}}>{data.seniors.filter(s=>(s.name+' '+s.city).toLowerCase().includes(query.toLowerCase())).map(s=><button key={s.id} className="button secondary" style={{display:'flex',width:'100%',justifyContent:'space-between',marginBottom:8,textAlign:'left',borderColor:selected===s.id?'#397e6a':undefined}} onClick={()=>setSelected(s.id)}><span>{s.name}<small style={{display:'block'}}>{s.age} years · {s.city}</small></span><span>{s.score??'Unknown'} · {s.urgency.replaceAll('_',' ')}</span></button>)}</div></section>
-  {senior&&<section className="panel extension-panel"><span className="eyebrow">PERSONAL BASELINE + ANOMALY MODEL</span><h2>{senior.name}</h2><p>{senior.action}</p><p>Risk score {senior.score??'unknown'} · support {senior.confidence}%</p>{senior.reasons.map((r,i)=><div key={i} style={{padding:'12px 0',borderBottom:'1px solid #e4eae5'}}><strong>{r.title}</strong><p>{r.detail}</p></div>)}<h3>Evidence-backed weekly report</h3>{report?<><p>{report.text}</p><small>{report.method}. {report.evidence.length} source observations can be inspected.</small><details><summary>Source dates and evidence IDs</summary><ul>{report.evidence.map(e=><li key={e.id}>{e.date} · {e.id}</li>)}</ul></details></>:<p>A report is precomputed for the first twelve priorities in this public tour. Authorized coordinators can generate reports for every senior in the care workspace.</p>}<p className="extension-note">The connected LLM can select checked facts and tone; it cannot invent readings, diagnoses or a reduced urgency. n8n model execution is enabled only after its credentials are connected.</p></section>}</div>
-  <section className="panel extension-panel" style={{marginTop:24}}><h2>Stretch goals, with visible evidence</h2><ul><li>Hindi and English four-question voice-bot implementation with signed call callbacks. Credited telephony connection is pending.</li><li>Weekly reports with evidence IDs, language selection, constrained model output and coordinator approval. n8n connection is pending.</li><li>Explicit phone-motion observation sessions that produce unconfirmed fall/inactivity candidates.</li><li>Coordinator usefulness feedback, held-out evaluation and an optional learned supplement.</li><li>Logged missed-dose sequences, timing gaps and schedule-duplication review.</li><li>Actual Android SIM SMS queue with signed device receipts; phone pairing is required before live delivery.</li></ul><p>This system flags risk for people to review. It does not diagnose a condition.</p></section></>}
- </main>;
+import Link from "next/link";
+import "./demo.css";
+
+const careSteps = [
+  {
+    number: "01",
+    title: "Share a little about the day",
+    description: "A wellbeing update, check-in, or care note helps keep everyone connected.",
+  },
+  {
+    number: "02",
+    title: "A person reviews what changed",
+    description: "Care teams can consider signals in context and decide whether follow-up is needed.",
+  },
+  {
+    number: "03",
+    title: "Keep the next step visible",
+    description: "Follow-ups have an owner, and updates can be shared with family by permission.",
+  },
+];
+
+export default function PublicDemo() {
+  return (
+    <main className="public-showcase demo-page">
+      <nav className="demo-header" aria-label="Main navigation">
+        <Link href="/" className="demo-brand" aria-label="SwasthSync home">
+          <span className="demo-brand-icon" aria-hidden="true">♡</span>
+          <span>SwasthSync</span>
+        </Link>
+        <Link className="button secondary demo-sign-in" href="/sign-in">
+          Care workspace <span aria-hidden="true">→</span>
+        </Link>
+      </nav>
+
+      <section className="demo-hero" aria-labelledby="demo-title">
+        <div>
+          <span className="demo-kicker">A MORE CONNECTED WAY TO CARE</span>
+          <h1 id="demo-title">Care, a little earlier.<br /><em>Support, a little closer.</em></h1>
+          <p>SwasthSync helps seniors, families, and care teams stay connected through thoughtful check-ins and human follow-up.</p>
+          <Link className="demo-primary-link" href="/sign-in">Explore the care workspace <span aria-hidden="true">→</span></Link>
+        </div>
+        <div className="demo-hero-art" aria-hidden="true">
+          <div className="demo-orbit demo-orbit-outer" />
+          <div className="demo-orbit demo-orbit-inner" />
+          <div className="demo-home-mark"><span>⌂</span><strong>Care starts<br />with a person.</strong><small>CONNECTED WITH CONSENT</small></div>
+          <span className="demo-orbit-dot demo-orbit-dot-one" />
+          <span className="demo-orbit-dot demo-orbit-dot-two" />
+        </div>
+      </section>
+
+      <section className="demo-principles" aria-label="Care principles">
+        <article><span className="demo-principle-icon" aria-hidden="true">♡</span><div><strong>People before dashboards</strong><p>Signals support a human review. They do not make diagnoses.</p></div></article>
+        <article><span className="demo-principle-icon warm" aria-hidden="true">⌂</span><div><strong>Respect for independence</strong><p>Seniors can stay connected in ways that work for them.</p></div></article>
+        <article><span className="demo-principle-icon blue" aria-hidden="true">✓</span><div><strong>Sharing by permission</strong><p>Family access follows the senior’s sharing choices.</p></div></article>
+      </section>
+
+      <section className="demo-approach" aria-labelledby="approach-title">
+        <div className="demo-section-heading">
+          <span className="demo-kicker">SMALL UPDATES. THOUGHTFUL ACTION.</span>
+          <h2 id="approach-title">Care is a conversation<br />that continues.</h2>
+          <p>A simple flow keeps everyday updates connected to the people who can act on them.</p>
+        </div>
+        <div className="demo-steps">
+          {careSteps.map((step) => (
+            <article key={step.number}>
+              <span>{step.number}</span>
+              <h3>{step.title}</h3>
+              <p>{step.description}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="demo-data-note" aria-label="Public page privacy note">
+        <span aria-hidden="true">◌</span>
+        <p>This public overview contains no senior profiles, care records, or observation histories.</p>
+      </section>
+
+      <footer className="demo-footer">
+        <Link href="/" className="demo-footer-brand">SwasthSync</Link>
+        <span>Built around dignity, privacy, and human care.</span>
+        <Link href="/sign-in">Open care workspace <span aria-hidden="true">→</span></Link>
+      </footer>
+    </main>
+  );
 }

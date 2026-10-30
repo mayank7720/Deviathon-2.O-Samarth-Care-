@@ -1,5 +1,8 @@
 # Vercel release checkpoint — 29 October 2026
 
+> Historical checkpoint: the current website is https://swasthsync.vercel.app/. Earlier website addresses below are retired; see [domain migration](DOMAIN_MIGRATION_2026_10_30.md).
+
+
 **Production:** https://samarth-care-codeburners.vercel.app/
 
 - Workspace/project: CodeBurners / `samarth-care`, existing Hobby plan.

@@ -1,5 +1,8 @@
 # Portal and cloud workflow release — 29 October 2026
 
+> Historical checkpoint: the current website is https://swasthsync.vercel.app/. Earlier website addresses below are retired; see [domain migration](DOMAIN_MIGRATION_2026_10_30.md).
+
+
 This checkpoint supersedes the account, portal and n8n status in earlier release notes.
 
 **Production:** https://samarth-care-codeburners.vercel.app/

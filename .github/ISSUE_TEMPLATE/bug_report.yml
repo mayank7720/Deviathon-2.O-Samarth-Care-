@@ -1,0 +1,31 @@
+name: Bug report
+description: Report a reproducible problem using synthetic examples.
+body:
+  - type: markdown
+    attributes:
+      value: Do not include passwords, tokens, private contact details or health records. See SECURITY.md for sensitive reports.
+  - type: input
+    id: area
+    attributes:
+      label: Page and account role
+      placeholder: Weekly AI summaries, care coordinator
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Use a fictional example and say whether this is local fixture or hosted mode.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Redacted evidence and environment
+      description: Include the commit, browser and safe error text. Carrier acceptance, delivery and human response are separate.

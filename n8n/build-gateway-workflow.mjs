@@ -2,7 +2,7 @@ import {writeFileSync,mkdirSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {weeklyReportWorkflow,VERIFY_PLAN} from './build-workflows.mjs';
 
-export const GATEWAY_APP_ORIGIN='https://samarth-care-codeburners.vercel.app';
+export const GATEWAY_APP_ORIGIN='https://swasthsync.vercel.app';
 export const GATEWAY_MODEL='gpt-5-mini';
 export const GATEWAY_PREPARE_MODEL=String.raw`const job=$input.first().json;
 if(job.claimed!==true||job.kind!=='weekly_report.request'||!job.facts||!job.schema||!/^[a-f0-9]{64}$/.test(job.factsHash)||!['en','hi'].includes(job.language))throw new Error('The server did not claim a supported report job.');

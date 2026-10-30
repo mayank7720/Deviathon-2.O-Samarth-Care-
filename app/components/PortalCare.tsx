@@ -3,6 +3,7 @@
 import React,{useCallback,useEffect,useRef,useState} from 'react';
 import {careApi} from './AccessPortal';
 import './portal-care.css';
+import './portal-care-modern.css';
 
 type Senior={id:string;name:string};
 type Session={role:string;userId?:string;name?:string;seniorId?:string|null;isAdmin?:boolean};

@@ -15,11 +15,11 @@ function setup(){
  const context={authenticated:true,authorized:true,owner:'workspace:primary',session:{role:'coordinator',userId:'synthetic-coordinator',scope:['*']}};
  const event=(db,owner,kind,seniorId,payload,id=crypto.randomUUID())=>db.prepare('INSERT INTO care_events (id,owner,kind,senior_id,payload,created_at) VALUES (?,?,?,?,?,?)').bind(id,owner,kind,seniorId,JSON.stringify(payload),new Date(now).toISOString());
  const rows=()=>db.db.prepare('SELECT * FROM care_events ORDER BY rowid').all().map(r=>({...r,...JSON.parse(r.payload),seniorId:r.senior_id,createdAt:r.created_at}));
- async function call(path,{body,method=body?'POST':'GET',signed=false,scope,role,overrides={},clock=now,signature,rawBody}={}){
+ async function call(path,{body,method=body?'POST':'GET',signed=false,scope,role,overrides={},clock=now,serverClock=now,signature,rawBody}={}){
   const raw=rawBody??(body?JSON.stringify(body):''),pathname='/api/'+path;
   const headers={...(body?{'content-type':'application/json'}:{}),...(signed?await signBridgeRequest({method,path:pathname,body:raw,secret,timestamp:Math.floor(clock/1000)}):{}),...signature};
   const request=new Request('https://care.example'+pathname,{method,headers,body:raw||undefined});
-  const response=await handleTelephonyRoute({path,request,body:body||{},rawBody:raw,db,context:{...context,session:{...context.session,...(scope?{scope}:{}),...(role?{role}:{})}},env:{...env,...overrides},rows:rows(),getSenior:async id=>({id,familyConsent:consent}),event,asOfDate:'2026-10-29',now});
+  const response=await handleTelephonyRoute({path,request,body:body||{},rawBody:raw,db,context:{...context,session:{...context.session,...(scope?{scope}:{}),...(role?{role}:{})}},env:{...env,...overrides},rows:rows(),getSenior:async id=>({id,familyConsent:consent}),event,asOfDate:'2026-10-29',now:serverClock});
   return {status:response.status,data:await response.json(),headers};
  }
  return {db,call,rows,context,event,setConsent:value=>{consent=value;}};
@@ -70,11 +70,29 @@ test('device evidence distinguishes accepted, sent and delivered and cannot fabr
 test('withdrawn family consent prevents a queued job reaching the Android device',async()=>{
  const f=setup();try{const result=await f.call('telephony/jobs',{body:{...input,contactId:'test-family',template:'followup'}});f.setConsent(false);assert.equal((await f.call(`telephony/jobs/${result.data.job.id}/claim`,{body:{},signed:true})).status,403);assert.deepEqual((await f.call('telephony/bridge/jobs',{signed:true})).data.jobs,[]);}finally{f.db.close();}
 });
+
+test('expired receipt recovery records an existing SMS after a contact edit without releasing a destination',async()=>{
+ const f=setup();try{
+  const {data:{job}}=await f.call('telephony/jobs',{body:input});
+  const claim=`telephony/jobs/${job.id}/claim`,receipt=`telephony/jobs/${job.id}/receipt`;
+  await f.call(claim,{body:{},signed:true});
+  assert.equal((await f.call(claim,{body:{receiptOnly:true},signed:true})).status,409);
+  f.db.accountContacts=async()=>[];
+  const clock=now+11*60000;
+  assert.equal((await f.call(claim,{body:{},signed:true,clock,serverClock:clock})).status,404);
+  assert.equal((await f.call(claim,{body:{receiptOnly:true},clock,serverClock:clock})).status,401);
+  const recovered=await f.call(claim,{body:{receiptOnly:true},signed:true,clock,serverClock:clock});
+  assert.equal(recovered.status,200);assert.equal(recovered.data.job.receiptOnly,true);assert.equal(recovered.data.job.phone,undefined);assert.equal(recovered.data.job.status,'processing');
+  const result=await f.call(receipt,{body:{leaseToken:recovered.data.job.leaseToken,providerId:job.id,status:'delivered'},signed:true,clock,serverClock:clock});
+  assert.equal(result.status,200);assert.equal(result.data.job.deliveredToHandset,true);assert.equal(result.data.job.humanRead,false);
+  assert.equal((await f.call(claim,{body:{receiptOnly:true},signed:true,clock:clock+11*60000,serverClock:clock+11*60000})).status,409);
+ }finally{f.db.close();}
+});
 test('assisted calls return the approved dialer URI without claiming a connected call',async()=>{
  const f=setup();try{const result=await f.call('telephony/jobs',{body:{...input,channel:'android_dialer'}});const dial=await f.call(`telephony/jobs/${result.data.job.id}/dial`,{body:{}});assert.equal(dial.status,200);assert.equal(dial.data.dialUri,'tel:'+phone);assert.equal(dial.data.job.status,'awaiting_device_action');assert.equal(dial.data.externalDelivery,false);assert.equal((await f.call(`telephony/jobs/${result.data.job.id}/dial`,{body:{}})).status,409);}finally{f.db.close();}
 });
 test('authenticated heartbeats are fresh device evidence and cannot be replayed',async()=>{
- const f=setup();try{const result=await f.call('telephony/bridge/heartbeat',{body:{deviceReady:true},signed:true});assert.equal(result.status,200);assert.equal((await f.call('telephony/config')).data.androidOnline,true);assert.equal((await f.call('telephony/bridge/heartbeat',{body:{deviceReady:true},signature:result.headers})).status,409);}finally{f.db.close();}
+ const f=setup();try{f.db.accountContacts=async()=>{throw Error('A heartbeat must not load the contact directory');};const result=await f.call('telephony/bridge/heartbeat',{body:{deviceReady:true},signed:true});assert.equal(result.status,200);assert.equal((await f.call('telephony/bridge/heartbeat',{body:{deviceReady:true},signature:result.headers})).status,409);delete f.db.accountContacts;assert.equal((await f.call('telephony/config')).data.androidOnline,true);}finally{f.db.close();}
 });
 test('bridge HMAC binds method, path and exact JSON bytes',async()=>{
  const timestamp=Math.floor(now/1000),path='/api/telephony/jobs',body='{}',signed=await signBridgeRequest({method:'POST',path,body,secret,timestamp});
@@ -118,7 +136,7 @@ test('Android SMS pins the configured SIM and rejects invalid slots before conta
 });
 test('credited voice refuses paid accounts and reports provider acceptance rather than call delivery',async()=>{
  const account='AC'+'1'.repeat(32),voiceEnv={SAMARTH_TWILIO_TRIAL_ENABLED:'true',TWILIO_ACCOUNT_SID:account,TWILIO_AUTH_TOKEN:'synthetic-private-twilio-token',TWILIO_FROM_NUMBER:'+19990000004'},job={phone,channel:'voice_bot',callbackUrl:'https://care.example/voice/start',statusCallbackUrl:'https://care.example/voice/status'};
- let posted=0;const result=await startTrialVoiceCall(job,voiceEnv,{fetchImpl:async(url,options={})=>{if(options.method==='POST'){posted++;const body=new URLSearchParams(options.body);assert.equal(body.get('To'),phone);assert.equal(body.get('Url'),job.callbackUrl);assert.equal(body.has('Record'),false);return Response.json({sid:'CA'+'2'.repeat(32)});}return Response.json({type:'Trial'});}});
+ let posted=0;const result=await startTrialVoiceCall(job,voiceEnv,{fetchImpl:async(url,options={})=>{if(options.method==='POST'){posted++;const body=new URLSearchParams(options.body);assert.equal(body.get('To'),phone);assert.equal(body.get('Url'),job.callbackUrl);assert.equal(body.get('Record'),'false');assert.equal(body.get('TimeLimit'),'240');return Response.json({sid:'CA'+'2'.repeat(32)});}return Response.json({type:'Trial'});}});
  assert.equal(result.status,'accepted');assert.equal(result.externalDelivery,false);assert.equal(posted,1);
  await assert.rejects(startTrialVoiceCall(job,voiceEnv,{fetchImpl:async()=>Response.json({type:'Full'})}),e=>e.status===409);
  await assert.rejects(startTrialVoiceCall(job,{...voiceEnv,SAMARTH_TWILIO_TRIAL_ENABLED:'false'}),e=>e.status===503);
@@ -143,8 +161,16 @@ test('staff and household prompts match the destination role',async()=>{
   const family=await f.call('telephony/jobs',{body:{...input,contactId:'test-family',template:'checkin'}});assert.equal(family.status,400);
  }finally{f.db.close();}
 });
-test('wellbeing call bots refuse family and staff destinations',async()=>{
- const f=setup();try{const result=await f.call('telephony/jobs',{body:{...input,channel:'voice_bot',contactId:'test-family',template:'followup'},overrides:{SAMARTH_TWILIO_TRIAL_ENABLED:'true'}});assert.equal(result.status,400);assert.match(result.data.error,/senior account/);}finally{f.db.close();}
+test('voice calls bind each receiving role to its own purpose and saved number',async()=>{
+ for(const role of ['senior','family','coordinator','operations']){
+  const f=setup();try{
+   const contact={...contacts[0],id:'role-'+role,role};f.db.accountContacts=async()=>[contact];
+   const template={senior:'checkin',family:'followup',coordinator:'staff_alert',operations:'escalation'}[role],overrides={SAMARTH_TWILIO_TRIAL_ENABLED:'true'};
+   const result=await f.call('telephony/jobs',{body:{...input,channel:'voice_bot',contactId:contact.id,template},overrides});
+   assert.equal(result.status,201);assert.equal(result.data.job.recipientRole,role);assert.equal(result.data.job.contactId,contact.id);assert.equal(result.data.job.phone,undefined);
+   const wrong=role==='senior'?'followup':'checkin';assert.equal((await f.call('telephony/jobs',{body:{...input,channel:'voice_bot',contactId:contact.id,template:wrong},overrides})).status,400);
+  }finally{f.db.close();}
+ }
 });
 test('routing status never requests external delivery and is staff scoped',async()=>{
  const f=setup();try{const result=await f.call('telephony/routing');assert.equal(result.status,200);assert.deepEqual(result.data.routes,[]);assert.equal(result.data.automaticSms,false);assert.equal((await f.call('telephony/routing',{role:'family'})).status,403);}finally{f.db.close();}

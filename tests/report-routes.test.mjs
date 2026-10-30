@@ -5,11 +5,11 @@ import {handleReportRoute} from '../lib/report-routes.mjs';
 
 const owner='workspace:primary',senior={id:'S001',name:'Fictional senior',familyConsent:false,baseline:{},level:'unknown'};
 const env={SAMARTH_N8N_ENABLED:'true',SAMARTH_N8N_REPORT_WEBHOOK_URL:'https://fixture.app.n8n.cloud/webhook/samarth-weekly-report',SAMARTH_N8N_HMAC_SECRET:'fixture-only-report-signing-secret-of-sufficient-length'};
-function fixture(){
+function fixture({records=[{seniorId:'S001',date:'2026-10-29',vitals:{systolic:130}}]}={}){
  const db=new LocalD1(),event=(store,eventOwner,kind,seniorId,payload,id)=>store.prepare('INSERT INTO care_events (id,owner,kind,senior_id,payload,created_at) VALUES (?,?,?,?,?,?)').bind(id,eventOwner,kind,seniorId,JSON.stringify(payload),'2026-10-29T09:00:00Z');
  const getRows=()=>db.db.prepare('SELECT * FROM care_events ORDER BY created_at,id').all().map(row=>({...JSON.parse(row.payload),id:row.id,kind:row.kind,seniorId:row.senior_id,createdAt:row.created_at}));
  const call=async({method='GET',body={},role='coordinator'}={})=>{
-  const response=await handleReportRoute({path:'reports',request:new Request('https://care.example/api/reports?seniorId=S001',{method}),body,db,context:{owner,userId:'fixture-coordinator',session:{role,userId:'fixture-coordinator',scope:['S001']}},rows:getRows(),cohort:{seniors:[senior],records:[],metadata:{synthetic:true}},getSenior:async id=>{assert.equal(id,'S001');return senior;},event,asOfDate:'2026-10-29',env});
+  const response=await handleReportRoute({path:'reports',request:new Request('https://care.example/api/reports?seniorId=S001',{method}),body,db,context:{owner,userId:'fixture-coordinator',session:{role,userId:'fixture-coordinator',scope:['S001']}},rows:getRows(),cohort:{seniors:[senior],records,metadata:{synthetic:true}},getSenior:async id=>{assert.equal(id,'S001');return senior;},event,asOfDate:'2026-10-29',env});
   return {status:response.status,data:await response.json()};
  };
  return {db,event,call,getRows,close:()=>db.close()};
@@ -36,6 +36,22 @@ test('early accepted report remains processing until a saved completion exists, 
   const completed=await f.call();assert.equal(completed.data.reports.length,1);assert.equal(completed.data.reports[0].status,'pending_review');assert.equal(completed.data.reports[0].text,report.text);
   const completedRetry=await f.call({method:'POST',body});assert.equal(completedRetry.data.report.id,'n8n-report:'+key);assert.equal(completedRetry.data.report.text,report.text);assert.equal(dispatches,1);
  }finally{globalThis.fetch=priorFetch;f.close();}
+});
+
+test('an empty week is blocked before saving or submitting an AI request',async()=>{
+ const f=fixture({records:[]}),priorFetch=globalThis.fetch;let dispatches=0;
+ try{globalThis.fetch=async()=>{dispatches++;throw Error('Must not infer without evidence');};const r=await f.call({method:'POST',body:{seniorId:'S001',language:'en',mode:'n8n',idempotencyKey:crypto.randomUUID()}});assert.equal(r.status,409);assert.match(r.data.error,/No usable evidence/);assert.equal(dispatches,0);assert.equal(f.getRows().length,0);}finally{globalThis.fetch=priorFetch;f.close();}
+});
+
+test('week selection is saved, idempotency cannot change week and duplicate recorded-data drafts need explicit new version',async()=>{
+ const f=fixture({records:[{seniorId:'S001',date:'2026-10-20',vitals:{systolic:125}},{seniorId:'S001',date:'2026-10-29',vitals:{systolic:190}}]});
+ try{
+  const body={seniorId:'S001',language:'en',mode:'local',endDate:'2026-10-22',idempotencyKey:crypto.randomUUID()};
+  const first=await f.call({method:'POST',body});assert.equal(first.status,201);assert.equal(first.data.report.period.to,'2026-10-22');assert.equal(first.data.report.facts.statements.find(s=>s.id==='systolic').values.average,125);
+  const duplicate=await f.call({method:'POST',body:{...body,idempotencyKey:crypto.randomUUID()}});assert.equal(duplicate.status,200);assert.equal(duplicate.data.repeated,true);assert.equal(duplicate.data.report.id,first.data.report.id);
+  const changed=await f.call({method:'POST',body:{...body,endDate:'2026-10-29'}});assert.equal(changed.status,409);
+  const version=await f.call({method:'POST',body:{...body,newVersion:true,idempotencyKey:crypto.randomUUID()}});assert.equal(version.status,201);assert.notEqual(version.data.report.id,first.data.report.id);
+ }finally{f.close();}
 });
 
 test('an ambiguous submission retains its saved job without automatic redispatch or a fabricated report',async()=>{

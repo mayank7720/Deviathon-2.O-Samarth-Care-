@@ -1,0 +1,2 @@
+import Link from 'next/link';
+export default function NotFound(){return <main className="access-portal care-landing"><section className="access-auth-page"><div className="panel" style={{padding:32,maxWidth:520}}><h1>Page not found</h1><p>This page is unavailable. Choose a destination below.</p><div className="phone-support-actions"><Link className="button primary" href="/">Go to home</Link><Link className="button secondary" href="/sign-in">Sign in</Link></div></div></section></main>;}

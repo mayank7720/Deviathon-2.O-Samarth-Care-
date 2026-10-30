@@ -1,50 +1,34 @@
 # Vercel hosting
 
-Production domain: https://samarth-care-codeburners.vercel.app
+Canonical public origin: **https://swasthsync.vercel.app/**. Earlier Samarth Care domains are retired. This repository contains source, not the maintained project's private deployment credentials.
 
-The [Vercel release checkpoint](DELIVERY_VERCEL_2026_10_29.md) records the deployed commit, actual HTTPS authentication/role checks, paired-service checks and pending GitHub automation.
+## Build and runtime
 
-Project: `samarth-care`, CodeBurners workspace. The project uses the existing Hobby plan, a Node.js 22 project setting, the installed Next.js 16.3.4 and Mumbai (`bom1`) functions. Its broad package engine range should be pinned before relying on a fixed runtime major. No new database, paid integration or model subscription is required by this hosting change.
+`vercel.json` selects native Next.js and `npm run build:vercel`. Normal API traffic uses Supabase authentication, current memberships and database policies; production never enables local fixture login. Supabase's protected scheduled processor owns background care processing. A public deployment does not create Auth memberships, run migrations or connect a phone.
 
-## Runtime
+For an independent deployment:
 
-`npm run build:vercel` runs the native Next.js build. `vercel.json` selects that command and the Next.js framework. The API imports `lib/server-runtime.mjs`, which always uses Supabase authentication and disables local fixture access. Normal requests retain verified user sessions, scoped memberships and database RLS; no service-role key is needed on Vercel.
+1. Complete the separate [Supabase setup](SUPABASE.md), using your own project.
+2. Import this repository into your Vercel project and use the committed Next.js build configuration.
+3. Set server-side environment values from `.env.example` for your own backend. Add separately required callback/worker configuration only for integrations you are enabling. Never use a service-role key for normal user traffic or a browser-exposed variable.
+4. Set `SAMARTH_PUBLIC_URL` to your HTTPS origin. Configure exact matching Auth redirects, signed callback URLs and paired-service allowed origins. Browser notification permission is specific to an origin.
+5. Verify sign-in for assigned roles, scoped reads/writes and actual optional integrations before presenting them as working. Environment changes require a new deployment to take effect.
 
-The existing `npm run dev:supabase` and Vite/Cloudflare builds are retained. Their explicit Vite alias resolves the same runtime interface to `lib/server-runtime.cloudflare.mjs`, preserving local bindings. Supabase's existing scheduled Edge processor remains responsible for background jobs; no Vercel cron or second scheduler is added.
+[Official Vercel environment documentation](https://vercel.com/docs/environment-variables).
 
-For a local preview of the native production build, configure server-only Supabase environment variables, then run:
+## Local production preview
 
-```text
+With a separate authorised `.env.local` configuration:
+
+```bash
 npm run build:vercel
 npm run start:vercel -- --port 5180
 ```
 
-Use `http://localhost:5180` consistently. Next.js normalizes loopback addresses to `localhost`; mixing a `127.0.0.1` browser origin with that normalized request URL can fail the application's strict same-origin check. The normal local Vite launch remains at its existing URL.
+Use the printed loopback address consistently. The server normalises exact same-port loopback origins without trusting arbitrary forwarded headers. The alternate Vite/Cloudflare fixture remains available through `npm run dev`.
 
-## Server configuration
+## Maintained showcase status
 
-Existing configuration is transferred privately into production environment variables. Keep these server-side, without a `NEXT_PUBLIC_` prefix:
+The published n8n report workflow has generated genuine drafts from public-site requests. Generation is explicit, bounded by available credits and followed by human review. The call bot remains under development and is excluded from the current live showcase. Current status is in [PROJECT_STATUS](PROJECT_STATUS.md); older deployment IDs and earlier disabled-integration decisions remain in dated release notes.
 
-- `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, and the legacy anon key used for protected Edge callback forwarding.
-- `SAMARTH_AUTH_MODE=supabase`, synthetic-cohort settings, signup setting and scheduler status.
-- Existing VAPID configuration, Android bridge secret and local speech ticket secret.
-- `SAMARTH_PUBLIC_URL` set to the production HTTPS origin.
-
-Private values are not tracked. `.vercel/`, local environment files, tool state and private output artifacts are excluded from Git and deployment uploads.
-
-New public n8n generation remains disabled (`SAMARTH_N8N_ENABLED=false`) under the existing decision to keep new AI requests local. Saved authorized reports and computed reports remain available. Autonomous provider calls remain disabled. Deploying the website does not complete the open items in the [pre-show audit](PRE_SHOW_AUDIT_2026_10_29.md).
-
-## Laptop integrations
-
-The public website runs without the laptop. The Android/SIM relay and local Whisper transcription still need the paired laptop and phone:
-
-- The private relay application URL must point to the new HTTPS origin before jobs are processed there. Preserve existing gateway identifiers and terminal receipts; never resend an old job to test a new host.
-- Add the exact new HTTPS origin to the local speech service's allowed origins and restart that service. The speech secret must match its server-side ticket secret. Browser microphone/local-network permission remains a separate acceptance check.
-- Existing signed n8n workflows may still point to the old callback origin. Do not switch callback targets or enable public generation without verifying their actual published settings and retained jobs.
-- Browser push must be enrolled on the new origin. Permission and service-worker registration do not transfer between domains.
-
-## Release checks
-
-Run the application tests and production build, then check the deployed home page, anonymous auth status, denial of unsigned data requests, verified login, all four assigned roles, runtime date and logout. Confirm HTTPS cookies are Secure, HttpOnly and SameSite=Strict. Role switching on one administrator account does not prove isolation between four distinct users.
-
-Source changes are deployed from a recorded commit. Preserve collaborator commits and re-fetch before pushing; use branches and PRs for parallel changes. An audit checkpoint is historical evidence, not the status of all future deployments.
+The Android SMS gateway and local transcription service depend on their paired devices/processes even while the website is available in the cloud. Hosting, n8n executions, model credits and carrier/SIM allowances are separate costs. No 10,000-person capacity or zero-cost production guarantee is established.

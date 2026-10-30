@@ -53,7 +53,7 @@ Run the local speech service on the **same Linux host**, paired with the applica
 Create an ignored `.dev.vars.sim-call-worker` on the future Linux host. Placeholder values below are not credentials:
 
 ```dotenv
-SAMARTH_APP_URL="https://samarth-care.abloomgecko40.chatgpt.site"
+SAMARTH_APP_URL="https://swasthsync.vercel.app"
 SAMARTH_RELAY_EMAIL="YOUR_ASSIGNED_COORDINATOR_EMAIL"
 SAMARTH_RELAY_PASSWORD="YOUR_PRIVATE_PASSWORD"
 SAMARTH_SIM_BRIDGE_SECRET="A_PRIVATE_RANDOM_SECRET_OF_AT_LEAST_32_CHARACTERS"

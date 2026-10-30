@@ -28,6 +28,22 @@ function fixture({admin=true,existing=false,replay=false,accounts=[]}={}){
  const call=(payload=input,action='create')=>handler(new Request('https://project.supabase.co/functions/v1/account-admin',{method:'POST',headers:{'content-type':'application/json','x-samarth-user-token':'verified-user-token'},body:JSON.stringify({action,payload})}));return {call,calls};
 }
 test('only a live administrator can reach privileged provisioning',async()=>{const f=fixture({admin:false});assert.equal((await f.call()).status,403);assert.ok(f.calls.every(c=>!c.url.includes('/admin/')&&!c.url.includes('care_admin_')));});
+
+test('email changes bind the account identity and invalidate access through the audited apply path',async()=>{
+ const target='00000000-0000-0000-0000-000000000003';const f=fixture({accounts:[{userId:target,email:'old@example.test',roles:['family'],isAdmin:false,status:'active'}]});
+ const payload={targetUserId:target,email:'NEW@example.test',currentEmail:'old@example.test',confirmEmailChange:true,idempotencyKey:key};
+ assert.equal((await f.call(payload,'email')).status,200);
+ assert.deepEqual(f.calls.find(c=>c.url.endsWith('/admin/users/'+target)).body,{email:'new@example.test',email_confirm:true});
+ const apply=f.calls.find(c=>c.url.endsWith('/care_admin_apply'));assert.equal(apply.body.operation,'email');assert.equal(apply.body.target_user_id,target);assert.ok(!Object.hasOwn(apply.body.details,'password'));
+ const stale=fixture({accounts:[{userId:target,email:'changed@example.test',roles:['family'],isAdmin:false,status:'active'}]});assert.equal((await stale.call(payload,'email')).status,409);assert.ok(!stale.calls.some(c=>c.url.includes('/admin/users/')));
+});
+test('email changes reject unconfirmed ownership, protected owner and foreign fields',async()=>{
+ const payload={targetUserId:id,email:'new@example.test',currentEmail:'old@example.test',confirmEmailChange:true,idempotencyKey:key};
+ for(const change of [{confirmEmailChange:false},{email:'invalid'},{email:'old@example.test'},{password:'should never go here'},{role:'operations'}])assert.throws(()=>validateAccountAction('email',{...payload,...change}));
+ assert.equal((await fixture().call(payload,'email')).status,403);
+ const f=fixture({replay:true,accounts:[{userId:'00000000-0000-0000-0000-000000000003',email:'old@example.test',isAdmin:false,status:'active'}]});
+ assert.equal((await f.call({...payload,targetUserId:'00000000-0000-0000-0000-000000000003'},'email')).status,200);assert.ok(!f.calls.some(c=>c.url.includes('/admin/users/')));
+});
 test('creation returns a strong initial password once without storing it in administration records',async()=>{const f=fixture();const response=await f.call();assert.equal(response.status,200);const result=await response.json();assert.ok(result.initialPassword.length>=40);assert.equal(result.emailSent,false);const create=f.calls.find(c=>c.url.endsWith('/admin/users'));assert.equal(create.body.password,result.initialPassword);assert.ok(f.calls.filter(c=>c.url.includes('/rpc/')).every(c=>!JSON.stringify(c.body).includes(result.initialPassword)));assert.equal(response.headers.get('cache-control'),'no-store');});
 test('replay does not create a second user or disclose an initial password',async()=>{const f=fixture({replay:true});const response=await f.call();assert.equal(response.status,200);assert.equal((await response.json()).initialPassword,null);assert.ok(!f.calls.some(c=>c.url.includes('/admin/users')));});
 test('an existing email is never silently overwritten or assigned a new password',async()=>{const f=fixture({existing:true});assert.equal((await f.call()).status,409);assert.ok(!f.calls.some(c=>c.url.includes('/admin/users')));});
@@ -89,4 +105,37 @@ test('Operations can set a subordinate password without persisting or returning 
  const update=f.calls.find(c=>c.url.endsWith('/admin/users/'+target));assert.deepEqual(update.body,{password:chosen});
  assert.ok(f.calls.filter(c=>c.url.includes('/rpc/')).every(c=>!JSON.stringify(c.body).includes(chosen)));
  assert.ok(!JSON.stringify(result).includes(chosen));
+});
+
+test('password changes support each subordinate identity without changing care assignments',async()=>{
+ const target='00000000-0000-0000-0000-000000000003',chosen='A new private password 59!';
+ for(const role of ['senior','family','coordinator']){
+  const f=fixture({accounts:[{userId:target,email:role+'@example.test',roles:[role],isAdmin:false,status:'active',seniorIds:['S001']}]});
+  const response=await f.call({targetUserId:target,password:chosen,confirmReset:true,idempotencyKey:key},'password');
+  assert.equal(response.status,200,role);const result=await response.json();assert.equal(result.passwordChosen,true);
+  const applied=f.calls.find(c=>c.url.endsWith('/care_admin_apply'));
+  assert.equal(applied.body.operation,'password');assert.equal(applied.body.target_user_id,target);
+  assert.ok(!Object.hasOwn(applied.body.details,'role'));assert.ok(!Object.hasOwn(applied.body.details,'seniorIds'));
+  assert.ok(!f.calls.some(c=>c.url.endsWith('/care_admin_validate_identity')||c.url.endsWith('/care_admin_find_user')));
+ }
+});
+
+test('a completed password reset replay neither changes Auth again nor confirms a newly typed password',async()=>{
+ const target='00000000-0000-0000-0000-000000000003',chosen='A different typed password 86!';
+ const f=fixture({replay:true,accounts:[{userId:target,email:'family@example.test',roles:['family'],isAdmin:false,status:'active',seniorIds:['S001']}]});
+ const response=await f.call({targetUserId:target,password:chosen,confirmReset:true,idempotencyKey:key},'password');
+ assert.equal(response.status,200);const result=await response.json();
+ assert.equal(result.credentialsAlreadyShown,true);assert.equal(result.initialPassword,null);assert.notEqual(result.passwordChosen,true);
+ assert.ok(!JSON.stringify(result).includes(chosen));assert.ok(!f.calls.some(c=>c.url.includes('/auth/v1/admin/users/')));
+ assert.ok(!f.calls.some(c=>c.url.endsWith('/care_admin_apply')));
+});
+
+test('a generated subordinate password is returned once and excluded from all care RPCs',async()=>{
+ const target='00000000-0000-0000-0000-000000000003';
+ const f=fixture({accounts:[{userId:target,email:'senior@example.test',roles:['senior'],isAdmin:false,status:'active',seniorIds:['S001']}]});
+ const response=await f.call({targetUserId:target,confirmReset:true,idempotencyKey:key},'password');
+ assert.equal(response.status,200);const result=await response.json();assert.ok(result.initialPassword.length>=40);assert.equal(result.passwordChosen,false);
+ assert.equal(f.calls.find(c=>c.url.endsWith('/auth/v1/admin/users/'+target)).body.password,result.initialPassword);
+ assert.ok(f.calls.filter(c=>c.url.includes('/rpc/')).every(c=>!JSON.stringify(c.body).includes(result.initialPassword)));
+ assert.equal(response.headers.get('cache-control'),'no-store');
 });

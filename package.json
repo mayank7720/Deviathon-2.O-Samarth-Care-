@@ -6,6 +6,9 @@
     "node": ">=22.13.0"
   },
   "scripts": {
+    "check:repo": "node scripts/check-repository.mjs",
+    "typecheck": "tsc --noEmit",
+    "smoke:local": "node scripts/smoke-local.mjs",
     "install:ci": "node scripts/install-ci.mjs",
     "dev": "node scripts/run-framework.mjs dev",
     "build": "node scripts/run-framework.mjs build",
@@ -26,6 +29,7 @@
     "evaluate:realistic": "node scripts/evaluate-realistic.mjs",
     "evaluate:upgrade": "node scripts/evaluate-algorithm-upgrade.mjs",
     "evaluate:representative": "node scripts/evaluate-representative.mjs",
+    "train:sms": "node scripts/train-sms-intent.mjs",
     "android:relay": "node scripts/android-relay.mjs",
     "phone:check": "node scripts/device-preflight.mjs --check",
     "speech:setup": "powershell -NoProfile -File scripts/setup-speech.ps1 -Model base -DownloadModel",

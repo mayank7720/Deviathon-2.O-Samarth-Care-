@@ -1,8 +1,10 @@
 # n8n orchestration and grounded reports
 
-The user reports a hackathon-provided **n8n Pro subscription with 10,000 monthly workflow executions**. The [Gateway report workflow](https://samarth-care.app.n8n.cloud/workflow/m8dThX9iEttuaHni) is published with an encrypted Crypto signing credential approved by the user. One signed request from the local application completed as execution **#1** in **11.001 seconds**, using `gpt-5-mini-2025-08-07`. The validated result was saved in Supabase as a 598-character `pending_review` report with `llmUsed:true` and no fallback. Coordinator approval and family delivery have not occurred. The user chose to keep new AI generation local for now; the public site does not dispatch new model requests.
+The user reports a hackathon-provided **n8n Pro subscription with 10,000 monthly workflow executions**. The [Gateway report workflow](https://samarth-care.app.n8n.cloud/workflow/m8dThX9iEttuaHni) is published with the approved encrypted Crypto signing credential. The public website at https://swasthsync.vercel.app/ dispatches masked, explicitly requested weekly reports to this workflow.
 
-The model node showed **$2.00 in Gateway credits before the test**. Recheck the current balance before further execution; no top-up or unlimited allowance is implied. The reported 10,000 workflow executions and the model-credit balance are separate.
+On 30 October 2026, the published workflow was updated through the authenticated n8n API to version `6a902873-d31c-484c-a082-b533ab323e0e`: 23 nodes, all four bounded failure branches connected, with the existing model settings preserved. A fresh request from the public website completed using `gpt-5-mini-2025-08-07` and stored a genuine `pending_review` draft with eight evidence entries and `llmUsed:true`. The acceptance check did not approve or send that draft to the family.
+
+The model node showed **$2.00 before the first historical test** and **$1.99 before a later check**. These are historical observations, not the current balance. The reported 10,000 workflow executions and model credits are separate. No top-up or billing change was made during setup.
 
 ## What the AI actually does
 
@@ -18,7 +20,7 @@ Computed mode uses the same factual renderer without an LLM. A missing, disabled
 
 `providerReportFacts()` is an explicit whitelist. The provider receives dates, supported aggregate values, non-identifying cue names, anonymous evidence aliases and approved statement choices. It receives no name, senior ID, email, telephone number, raw call note, contact detail or original record identifier. Derived health aggregates remain sensitive; masking does not make them anonymous. Use synthetic showcase data unless a governed real-data workflow has been established.
 
-The exports request no saved success/error execution data, no manual saving and no pinned example health data. **Importing the JSON did not preserve these workflow settings in the inspected instance:** the first synthetic execution used the instance's default Save settings. Check the actual workflow Settings UI and explicitly set failed, successful, manual and progress saving to **Do not save**, then save/publish and verify. Do not infer deployed retention from the export alone. The first saved synthetic execution is not evidence of a no-retention deployment. Instance-level retention, audit and credential policies also need inspection. Do not use real health records as mock data in n8n's AI Workflow Builder.
+The published workflow's settings were read back from the n8n API after publication: successful/error data saving is `none`, and manual/progress saving is `false`. The native model request uses `store:false`. Early historical imports had used instance defaults; those observations do not describe the current published settings. Use synthetic showcase data rather than real health records in workflow examples.
 
 ## Importable workflows
 
@@ -75,7 +77,7 @@ Live acceptance has verified report import/publication, protected signing, an ac
 
 ## The 10,000-execution budget
 
-The reported allowance counts workflow executions, rather than servers, node steps or seniors. The report webhook starts one execution for each requested senior report and is deliberately invoked from the configured local app. The optional voice webhook would start another execution per dispatch request; it remains unconnected to a live carrier path.
+The reported allowance counts workflow executions, rather than servers, node steps or seniors. The report webhook starts one execution for each explicitly requested senior report from the public or configured local application. Automatic weekly cohort-wide LLM batches are not enabled. The optional voice webhook would start another execution per dispatch request; the current website calls its protected trial-provider worker directly.
 
 These are planning calculations, not a demonstrated capacity benchmark:
 

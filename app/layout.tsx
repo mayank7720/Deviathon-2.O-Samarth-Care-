@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Samarth Care — Care, a little earlier",
+  title: "SwasthSync — Care, a little earlier",
   description:
     "An explainable early-warning workspace for thoughtful senior care. A synthetic-data demonstration with human-guided care priorities.",
   manifest: "/manifest.webmanifest",

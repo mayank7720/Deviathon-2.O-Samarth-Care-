@@ -1,39 +1,39 @@
-# DEV_104 implementation evidence
+# DEV_104 coverage
 
-The supplied *Early Warning for Seniors Living at Home* brief defines product requirements. It does not authorize contacting real families or processing patient data. This showcase uses synthetic identities and signals only.
+The assigned brief requests an early-warning prototype for seniors living at home. The showcase uses synthetic identities and signals. It does not establish clinical safety or real-world early detection.
 
-| Requirement | Implemented evidence | Limit |
-| --- | --- | --- |
-| Ranked daily priority view | Shared urgency-first coordinator queue with city/search, trend, reasons and next action; unknown scores request a fresh check-in | Replay/live clock does not manufacture current data |
-| Three signal types | Vitals, medication counts/doses, Hindi/English notes; additional lifestyle and explicitly enabled foreground phone motion | Browser motion is foreground-only and unvalidated; a device impact is not a confirmed human fall |
-| Unstructured understanding | Shared English/Hindi/Hinglish local cue extraction, bounded negation, subject filtering and dated evidence | No general LLM understanding or independent clinical language corpus |
-| Rules plus anomaly model | Personal-baseline rules and 48-tree Isolation Forest; bidirectional BP changes, baseline warm-up and missing-data handling | No diagnostic claim; thresholds illustrative |
-| Explainable action | Baseline comparisons, reasons, concrete human follow-up, task outcomes | Clinical and workflow validation still required |
-| Named care ownership | Fictional local counsellor, care leader and backup per household; administrator-recorded assignments and two-family primary capacity | Operational planning does not grant account access or establish real staff availability; source context is in [SAMARTH_CONTEXT.md](SAMARTH_CONTEXT.md) |
-| Human follow-up trail | Staff-only cases record a next action, contact attempts/results, leader escalation and resolution outcome; append-only revisions reject conflicting changes | Manual attestations do not prove carrier delivery, dispatch a service or clear a new risk flag; Operations can read, while scoped coordinators record cases |
-| 200 seniors over 90 days | Reference-informed mode: 200 profiles and 17,226 observed records, provenance, correlated histories, modality-specific missingness and quality audit; legacy stress set retained separately | Synthea reference and generated records are synthetic; not real patient histories or an Indian population estimate |
-| Metrics and early detection | Reference-informed partial-label evaluation: 20% high-priority scenario-day coverage, 3/4 held-out cases; at existing review threshold 30: 60% coverage, 4/4 cases, mean 3.75 days after onset | Unlabelled days cannot establish clinical precision/F1; legacy 93.7% figure is not transferred to this mode |
-| Senior accessibility | Simple check-in; four-question Hindi/English keypad bot; coordinator-assisted call entry; signed ingestion; optional local speech | Actual autonomous call requires a connected credited trial provider; Android assisted SIM calls require pressing Call |
-| Family summary | Dated facts, evidence aliases, coverage, optional n8n/LLM-guided evidence-locked plan, safe renderer and coordinator-approved delivery | n8n workspace/provider/credits remain to be connected; computed fallback is explicitly labelled, not presented as LLM success |
-| Operations | Alert counts, first recorded acknowledgment latency, separate task completion duration, city/team aggregation and documented outcomes | Historical latency exists only when actual lifecycle timestamps were recorded |
-| Access control | Sites identity or standalone verified Supabase email/password; assigned roles/scopes, email-bound invitations and immediate revocation | Public landing only; loopback fixture accounts are separate |
-| Consent and privacy | Consent rechecked for family records, summaries, alerts, messages and voice signaling | Retention, organizational policy and real-data adoption need governance |
-| Alert fatigue | Daily deduplication, acknowledgment, outcome, nonurgent cooldown/snooze, urgent bypass | Field false-alarm burden not measured |
-| Feedback loop | Local logistic usefulness supplement after sufficient class-balanced labels | Senior-group holdout; never reduces clinical urgency; may remain untrained |
-| Trend and domain insight | Nine-domain analysis and descriptive three-day linear projection with residual band | Does not predict illness or provide medical probabilities |
-| Medication patterns | Logged adherence, missed-day/time patterns and duplicate schedule review | No medication-interaction database or treatment advice |
-| Fall/inactivity stretch | Real foreground phone-motion events and quiet-period aggregates, explicit save and unconfirmed human-review candidate; submitted sensors and note rules remain supported | Compatible phone and permission needed; no continuous background/wearable coverage or certified detector |
-| Communication | Protected inbox/read receipts, WebRTC browser audio, generic browser push, approved contacts, USB-local Android SMS adapter with actual state receipts and assisted real dialer | Device pairing and one live owned-number test remain; SIM charges/limits apply, autonomous bot needs provider credits; no hardware delivery inferred from tests |
-| Daily processing | Inspectable India-time live clock or deterministic replay, stored daily scores, deduplicated alerts/outbox and retryable processing | Manual/local execution and hosted scheduling must be verified separately |
-| Low cost | No paid inference, telecom or relay key required; source runs locally | Hosting quotas/costs and 10,000-person scale not proven |
-| Deliverables | Source, README, technical write-up, evaluation exports and five-minute script | Repository audience and hosting access follow owner settings |
+| Requirement | Implemented evidence | Remaining limit |
+|---|---|---|
+| Three signal types | Dated vitals, medication logs and free-text/call-note records | Invalid, missing and conflicting measurements remain explicit |
+| Unstructured understanding | English/Hindi/Hinglish cue rules with assertion, negation and subject checks; optional reviewed local speech drafts | Bounded vocabulary; no independent clinical language validation |
+| Daily rules plus ML | Personal-reference rules, calibrated 48-tree Isolation Forest and sustained-change evidence | Synthetic model evaluation; insufficient data can cause abstention |
+| Explainable action | Urgency-ranked queue, dated reasons, personal comparisons and suggested human contact | Recommendations need human verification |
+| 200 seniors over 90 days | Reference-informed fictional cohort, gaps, noise and authored decline/recovery cases | 17,226 observed entries in the default seed; no real patient cohort |
+| Low-tech access | Registered-phone HELP SMS and coordinator-assisted input | Voice/simple-call requirement remains incomplete; SMS alone does not cover every senior |
+| Family information | Consent-bound serious/support notices and reviewed weekly summaries | No automatic weekly inference or auto-approval schedule |
+| Operations | Account administration, assignments, unresolved work and recorded outcome metrics | Manual activity records do not prove completed care |
+| Alert fatigue | Deduplication, explicit uncertainty, current evidence and repeated-change checks | Real-world false-alarm burden is unmeasured |
+| Privacy | Current role/scope checks, database policies, family consent and masked report facts | Production governance, retention and independent audit remain outstanding |
+| Low cost | Local scoring and existing showcase allocations | 10,000-senior capacity and production cost are unproven |
 
-## Further acceptance work
+## Stretch goals
 
-Validate thresholds, multilingual extraction, missed incidents, alert fatigue and action wording with domain experts and representative governed data. Test actual microphone/audio quality with two distinct authorized accounts on compatible devices. Test keyboard, low-vision and hearing accessibility with intended users. A real phone integration needs hardware or provider infrastructure, caller identity, consent, delivery evidence and escalation operations. Benchmark 10,000-person model computation and actual cloud storage/delivery cost before scale claims; an indexed cached-read benchmark alone cannot establish these.
+| Goal | Status |
+|---|---|
+| Hindi voice check-in bot | Under development; no completed physical application bot call. Excluded from this showcase. |
+| LLM weekly summary | Real n8n model draft accepted and saved; evidence, review and family-sharing controls implemented |
+| Fall/inactivity | Experimental foreground device evidence and unconfirmed candidates; no validated continuous wearable monitoring |
+| Feedback learning | Feedback capture and experimental usefulness code exist; an improving deployed model is not established |
+| Medication interactions or patterns | Logged missed-dose and recurring timing patterns implemented; drug interactions not implemented |
 
-Run `npm test` for implementation checks and `npm run evaluate` for the deterministic dataset and metrics. Final test/build/browser/deployment status is recorded separately; no fixed test count is promised here.
+## Evaluation
 
-`tests/care-operations-hosted-rollback.sql` verifies database enforcement of administrator assignment access, saved city capacity, verified actors, sequential case revisions and contact/outcome evidence. It uses temporary synthetic users and rolls back every fixture. The private validation roster follows the reference-informed cohort; changing that cohort's identities or cities requires a matching migration. Care operations uses a separate indexed event scan; reaching its 5,000-event bound returns an explicit service error rather than resetting ownership or case history.
+Current risk results and exact denominators are in [personal risk v3](ALGORITHM_V3_2026_10_30.md). Representative synthetic review-day coverage is 28/40 (70%) across two authored cases, with mean first review four days after onset. Clinical precision/recall and useful advance warning are unestablished. Earlier stress-test results cannot be transferred to this cohort.
 
-No real patient dataset or pretrained clinical model weights are used. The new generator uses aggregate distributions from a cited external **synthetic** Synthea archive; its provenance, hash and assumptions are in [DATA_REALISM.md](DATA_REALISM.md). The anomaly algorithm follows [Liu, Ting and Zhou, ICDM 2008](https://doi.org/10.1109/ICDM.2008.17). See [n8n/report grounding](N8N.md), [actual phone setup](TELEPHONY.md), [analytics](ANALYTICS.md), [access](ACCESS.md), and the [current checkpoint](DELIVERY_2026_10_29.md) for implementation and acceptance boundaries.
+The separate trained SMS supplement failed its release criteria and stays in shadow mode. [SMS model evidence](SMS_MODEL_EVALUATION.md)
+
+## Deliverables and evidence
+
+Source and setup: [README](../README.md), [quick start](QUICKSTART.md), [architecture](ARCHITECTURE.md), [demo](DEMO_SCRIPT.md), [data provenance](DATA_REALISM.md), frozen evaluation exports and tests. Earlier presentation/PDF files are historical submissions; consult [current status](PROJECT_STATUS.md) for present integration acceptance.
+
+No diagnosis, medicine change, emergency dispatch or guaranteed response is claimed.

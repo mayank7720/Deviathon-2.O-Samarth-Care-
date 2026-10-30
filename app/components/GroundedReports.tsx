@@ -1,104 +1,76 @@
 "use client";
-
-import { useEffect,useRef,useState } from 'react';
-import { careApi } from './AccessPortal';
+import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
+import {createPortal} from 'react-dom';
+import {careApi} from './AccessPortal';
+import {reportExportText} from '../../lib/report-export.mjs';
+import WeeklyReportDetail from './WeeklyReportDetail';
+import {emptyReview,reportLabel,reportStamp} from './weekly-report-types';
+import type {Bundle,Preview,WeeklyReport} from './weekly-report-types';
 import './grounded-reports.css';
+type Props={data:{date?:string;seniors?:{id:string;name:string}[];session:{role:string;isAdmin?:boolean};dataProvenance?:{startDate?:string}};notify:(message:string)=>void;onChanged?:()=>void|Promise<void>;onOpenDeliveries?:()=>void;initialSenior?:string;onSeniorChange?:(id:string)=>void};
+const message=(e:unknown)=>e instanceof Error?e.message:'The report request could not be completed.';
+const plus=(date:string,days:number)=>new Date(Date.parse(date+'T00:00:00Z')+days*86400000).toISOString().slice(0,10);
+const pending=(r:WeeklyReport)=>['queued','processing','awaiting_n8n','claimed'].includes(r.status);
+const empty:Bundle={reports:[],families:[],sharingConsent:false,managementAvailable:false};
+function normalize(value:Bundle):Bundle{return {...empty,...value,reports:(value.reports||[]).map(r=>({...r,review:{...emptyReview,...r.review}}))};}
 
-type SeniorOption={id:string;name:string};
-type Evidence={id:string;date:string;sourceRecordId?:string;fields?:string[];cues?:string[]};
-type Fact={id:string;kind:string;values?:Record<string,unknown>;sourceIds?:string[];text?:{en?:string;hi?:string}};
-type Report={id:string;seniorId:string;createdAt:string;status:string;text?:string;method?:string;provider?:string;model?:string;factsHash?:string;period?:{from?:string;to?:string};evidence?:Evidence[];facts?:{statements?:Fact[];evidence?:Evidence[];dataKind?:string};generation?:{llmUsed?:boolean;provider?:string;model?:string;fallbackReason?:string};limitations?:string[];error?:string;retryAllowed?:boolean;inspectionRequired?:boolean;retryJobId?:string|null;failureCode?:string|null;deadlineAt?:number|null};
-type Props={data:{seniors?:SeniorOption[];session:{role:string;isAdmin?:boolean}};notify:(message:string)=>void;onChanged?:()=>void|Promise<void>;onOpenDeliveries?:()=>void};
-const object=(value:unknown):Record<string,unknown>=>value&&typeof value==='object'&&!Array.isArray(value)?value as Record<string,unknown>:{};
-const errorMessage=(error:unknown)=>error instanceof Error?error.message:'Unable to load the report.';
-const failureMessages:Record<string,string>={model_error:'The model request did not complete successfully.',invalid_output:'The model response did not pass the saved-evidence checks.',workflow_error:'The report workflow could not prepare the model request.',callback_rejected:'The workflow could not confirm a saved report result.',deadline_exceeded:'The five-minute report deadline passed without an accepted result.'};
-const string=(value:unknown)=>typeof value==='string'?value:'';
-function reportList(value:unknown):Report[]{return Array.isArray(value)?value.filter(item=>typeof object(item).id==='string') as Report[]:[];}
-function stamp(value:string){return value?new Date(value).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',dateStyle:'medium',timeStyle:'short'}):'Not recorded';}
-function factValue(values:Record<string,unknown>={}) {return Object.entries(values).filter(([,value])=>['number','string','boolean'].includes(typeof value)).map(([key,value])=>`${key.replaceAll(/([A-Z])/g,' $1').toLowerCase()}: ${String(value)}`).join(' · ');}
-
-export default function GroundedReports({data,notify,onChanged,onOpenDeliveries}:Props) {
-  const [choice,setChoice]=useState(''),[language,setLanguage]=useState('en'),[mode,setMode]=useState('local');
-  const selectedId=choice||data.seniors?.[0]?.id||'';
-  const [reports,setReports]=useState<Report[]>([]),[error,setError]=useState(''),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[n8nConfigured,setN8nConfigured]=useState(false);
-  const terminalRetries=useRef(new Map<string,string>());
-  const retry=useRef<{signature:string;key:string}|null>(null);
-  const canGenerate=data.session.role==='coordinator'||data.session.role==='operations'&&data.session.isAdmin===true;
-  useEffect(()=>{
-    let active=true;
-    if(selectedId)careApi(`/reports?seniorId=${encodeURIComponent(selectedId)}`).then(result=>{if(active){setReports(reportList(result.reports));setError('');}}).catch(reason=>{if(active)setError(errorMessage(reason));}).finally(()=>{if(active)setLoading(false);});
-    return()=>{active=false;};
-  },[selectedId]);
-  useEffect(()=>{
-    let active=true;
-    careApi('/integrations/status').then(result=>{if(active)setN8nConfigured(object(result.n8n).configured===true);}).catch(()=>{if(active)setN8nConfigured(false);});
-    return()=>{active=false;};
-  },[]);
-  async function refresh(){
-    if(!selectedId)return;
-    setLoading(true);
-    try{const result=await careApi(`/reports?seniorId=${encodeURIComponent(selectedId)}`);setReports(reportList(result.reports));setError('');}catch(reason){setError(errorMessage(reason));}finally{setLoading(false);}
-  }
-  useEffect(()=>{
-    if(!reports.some(report=>['queued','processing','awaiting_n8n'].includes(report.status)))return;
-    const timer=setInterval(()=>{careApi(`/reports?seniorId=${encodeURIComponent(selectedId)}`).then(result=>{setReports(reportList(result.reports));setError('');}).catch(reason=>setError('Report status could not be refreshed. '+errorMessage(reason)));},10000);
-    return()=>clearInterval(timer);
-  },[reports,selectedId]);
-  async function generate(event:React.FormEvent){
-    event.preventDefault();if(!selectedId||!canGenerate)return;
-    setBusy(true);setError('');
-    const signature=JSON.stringify({selectedId,language,mode});
-    if(retry.current?.signature!==signature)retry.current={signature,key:crypto.randomUUID()};
-    try{
-      const result=await careApi('/reports','POST',{seniorId:selectedId,language,mode,idempotencyKey:retry.current.key});
-      const report=object(result.report);
-      if(typeof report.id==='string')setReports(prior=>[report as Report,...prior.filter(item=>item.id!==report.id)]);
-      retry.current=null;await onChanged?.();
-      notify(mode==='n8n'?'Report job submitted. Only validated model output can become a review draft.':'Report computed from the recorded observations. Review it before family sharing.');
-    }catch(reason){setError(errorMessage(reason));}finally{setBusy(false);}
-  }
-  async function retryFailed(report:Report){
-    if(!canGenerate||!n8nConfigured||!report.retryAllowed||busy)return;
-    setBusy(true);setError('');
-    let key=terminalRetries.current.get(report.id);
-    if(!key){key=crypto.randomUUID();terminalRetries.current.set(report.id,key);}
-    try{
-      const result=await careApi('/reports','POST',{action:'retry',reportId:report.id,idempotencyKey:key});
-      const saved=object(result.report);
-      if(typeof saved.id==='string')setReports(prior=>[saved as Report,...prior.filter(item=>item.id!==saved.id)]);
-      terminalRetries.current.delete(report.id);
-      await refresh();await onChanged?.();
-      notify(result.repeated?'The existing retry is shown. No second model request was sent.':'A new report attempt was saved and submitted.');
-    }catch(reason){await refresh();setError(errorMessage(reason));}finally{setBusy(false);}
-  }
-  return <>
-    <section className="page-intro"><div><span className="eyebrow">REPORTS YOU CAN TRACE</span><h1>Evidence & weekly reports</h1><p>Every figure comes from a recorded observation. Missing information stays visible, and a person approves family updates.</p></div></section>
-    <section className="panel grounded-report-controls">
-      <form onSubmit={generate}>
-        <label>Senior<select value={selectedId} onChange={event=>{setChoice(event.target.value);setLoading(true);}}>{data.seniors?.map(senior=><option key={senior.id} value={senior.id}>{senior.name} · {senior.id}</option>)}</select></label>
-        <label>Report language<select value={language} onChange={event=>setLanguage(event.target.value)}><option value="en">English</option><option value="hi">हिन्दी</option></select></label>
-        <label>Generation method<select value={mode} onChange={event=>setMode(event.target.value)}><option value="local">Computed evidence report</option><option value="n8n" disabled={!n8nConfigured}>n8n + configured language model{n8nConfigured?'':' (not connected)'}</option></select></label>
-        <button className="button primary" disabled={busy||!selectedId||!canGenerate}>{busy?'Preparing report…':'Create review draft'}</button>
-      </form>
-      <div className="grounded-report-explanation"><strong>{n8nConfigured?'n8n connection configured':'Computed reports are ready'}</strong><p>The model may select and arrange verified statements. It cannot add readings, diagnoses or predicted events. The computed mode does not use an LLM.</p></div>
-    </section>
-    <div className="grounded-report-toolbar"><span>{reports.length} recorded report{reports.length===1?'':'s'}</span><button className="button secondary" onClick={refresh} disabled={busy||loading}>Refresh reports</button></div>
-    {error&&<p className="extension-error" role="alert">{error}</p>}
-    {loading?<div className="panel grounded-report-empty">Loading recorded reports…</div>:!reports.length?<div className="panel grounded-report-empty"><h2>No report has been generated yet</h2><p>Create a draft from the selected senior’s available entries. No figures are prefilled as an AI result.</p></div>:<div className="grounded-report-list">{reports.map(report=>{
-      const evidence=report.evidence||report.facts?.evidence||[],statements=report.facts?.statements||[];
-      return <article className="panel grounded-report-card" key={report.id}>
-        <header><div><span className="eyebrow">{report.period?.from||'Recorded period'}{report.period?.to?` — ${report.period.to}`:''}</span><h2>{report.method||'Weekly wellbeing report'}</h2></div><span className={`grounded-report-status ${report.status}`}>{report.status.replaceAll('_',' ')}</span></header>
-        <p className="grounded-report-copy">{report.text||(['queued','processing','awaiting_n8n'].includes(report.status)?'The model is processing the saved evidence. A result must pass validation within five minutes before a review draft is available.':['failed','timed_out','expired'].includes(report.status)?'No accepted report was created for this attempt.':'No report text is available for this record.')}</p>
-        {['failed','timed_out','expired'].includes(report.status)&&<div className="grounded-report-failure" role="status"><strong>{report.status==='failed'?'Generation stopped':'Report deadline reached'}</strong><p>{failureMessages[report.failureCode||'']||'The report did not reach a confirmed result.'}</p>{report.inspectionRequired?<p>A coordinator must inspect the n8n execution before another model request. The previous request may have reached the provider, so an automatic retry is blocked.</p>:report.retryJobId?<p>A retry has already been allocated. Its progress appears in the report list.</p>:report.retryAllowed?<><p>You can explicitly start one new attempt from the same saved evidence.</p>{canGenerate&&<button type="button" className="button secondary" disabled={busy||!n8nConfigured} onClick={()=>retryFailed(report)}>{busy?'Saving attempt…':n8nConfigured?'Retry saved evidence':'Reconnect n8n to retry'}</button>}</>:null}</div>}
-        {report.deadlineAt&&['queued','processing','awaiting_n8n'].includes(report.status)&&<p className="grounded-report-note">Awaiting a validated result until {stamp(new Date(report.deadlineAt).toISOString())}. Status refreshes every 10 seconds.</p>}
-        {report.error&&<p className="extension-error">{report.error}</p>}
-        {report.generation?.fallbackReason&&<p className="grounded-report-note">{report.generation.fallbackReason}</p>}
-        <dl className="grounded-report-meta"><div><dt>Created</dt><dd>{stamp(report.createdAt)}</dd></div><div><dt>Language model</dt><dd>{report.generation?.llmUsed?`${report.generation.provider||report.provider||'Configured provider'} · ${report.generation.model||report.model||'Configured model'}`:'No accepted LLM result'}</dd></div><div><dt>Data provenance</dt><dd>{report.facts?.dataKind?.replaceAll('_',' ')||'See source records'}</dd></div></dl>
-        {statements.length>0&&<details><summary>Inspect computed facts ({statements.length})</summary><div className="grounded-report-table-wrap"><table><thead><tr><th>Fact</th><th>Observed values</th><th>Source evidence</th></tr></thead><tbody>{statements.map(fact=><tr key={fact.id}><td><strong>{fact.id.replaceAll('_',' ')}</strong><p>{fact.text?.[language as 'en'|'hi']||fact.text?.en||''}</p></td><td>{factValue(fact.values)}</td><td>{fact.sourceIds?.join(', ')||'Window completeness calculation'}</td></tr>)}</tbody></table></div></details>}
-        {evidence.length>0&&<details><summary>Trace to source entries ({evidence.length})</summary><ul className="grounded-evidence-list">{evidence.map(item=><li key={item.id}><strong>{item.id}</strong><span>{item.date}</span><span>{item.fields?.join(', ')||item.cues?.join(', ')||'Recorded observation'}</span>{item.sourceRecordId&&<code>{item.sourceRecordId}</code>}</li>)}</ul></details>}
-        {report.factsHash&&<p className="grounded-report-hash">Evidence fingerprint <code>{string(report.factsHash)}</code></p>}
-        <div className="grounded-report-review"><p>{report.status==='approved'?'A coordinator has approved this report. Family access still depends on current sharing consent.':'Family delivery approval is managed in the notification center. A generated draft is not an approval or proof of delivery.'}</p>{report.status==='pending_review'&&onOpenDeliveries&&<button className="button secondary" onClick={onOpenDeliveries}>Review family delivery</button>}</div>
-      </article>;
-    })}</div>}
-  </>;
+export default function GroundedReports({data,notify,onOpenDeliveries,initialSenior='',onSeniorChange}:Props){
+ const [choice,setChoice]=useState(initialSenior),[language,setLanguage]=useState('en'),[mode,setMode]=useState('n8n'),[chosenEnd,setEnd]=useState(''),[newVersion,setNewVersion]=useState(false);
+ const seniorId=data.seniors?.some(s=>s.id===choice)?choice:data.seniors?.[0]?.id||'',seniorName=data.seniors?.find(s=>s.id===seniorId)?.name||seniorId;
+ const date=data.date||'',endDate=chosenEnd||date,canManage=data.session.role==='coordinator'||data.session.role==='operations'&&data.session.isAdmin===true;
+ const [saved,setSaved]=useState<{seniorId:string;bundle:Bundle}|null>(null),[refreshing,setRefreshing]=useState(false),[busy,setBusy]=useState(''),[error,setError]=useState('');
+ const [connection,setConnection]=useState<{checked:boolean;configured:boolean;reason:string}>({checked:false,configured:false,reason:'Checking the AI connection…'}),[connectionAttempt,setConnectionAttempt]=useState(0);
+ const [preview,setPreview]=useState<{key:string;value?:Preview;error?:string}|null>(null),[previewAttempt,setPreviewAttempt]=useState(0),[filter,setFilter]=useState('active'),[query,setQuery]=useState(''),[sort,setSort]=useState('newest'),[selected,setSelected]=useState(''),[autoRefresh,setAutoRefresh]=useState(true),[printReport,setPrintReport]=useState<WeeklyReport|null>(null);
+ const requestVersion=useRef(0),generating=useRef(false),mutation=useRef(false),retryKeys=useRef(new Map<string,string>()),generationKey=useRef<{signature:string;key:string}|null>(null),actionKey=useRef<{signature:string;key:string}|null>(null),refreshingRef=useRef(false),controlsRef=useRef<HTMLElement>(null);
+ const bundle=saved?.seniorId===seniorId?saved.bundle:empty,previewKey=seniorId+':'+endDate,coverage=preview?.key===previewKey?preview.value:null,previewError=preview?.key===previewKey?preview.error:'',loading=!!seniorId&&saved?.seniorId!==seniorId;
+ const refresh=useCallback(async()=>{
+  if(!seniorId)return;const version=++requestVersion.current;refreshingRef.current=true;setRefreshing(true);
+  try{const result=await careApi<Bundle>('/reports?seniorId='+encodeURIComponent(seniorId));if(version===requestVersion.current){setSaved({seniorId,bundle:normalize(result)});setError('');}}
+  catch(e){if(version===requestVersion.current){setError(message(e));setSaved(prior=>prior?.seniorId===seniorId?prior:{seniorId,bundle:empty});}}
+  finally{if(version===requestVersion.current){refreshingRef.current=false;setRefreshing(false);}}
+ },[seniorId]);
+ useEffect(()=>{const versionRef=requestVersion;void Promise.resolve().then(refresh);return()=>{versionRef.current++;};},[refresh]);
+ useEffect(()=>{let active=true;void careApi('/integrations/status').then(r=>{if(active)setConnection({checked:true,configured:r.n8n?.configured===true,reason:r.n8n?.reason||'No connection details returned.'});}).catch(e=>{if(active)setConnection({checked:true,configured:false,reason:message(e)});});return()=>{active=false;};},[connectionAttempt]);
+ useEffect(()=>{let active=true;if(seniorId&&endDate)void careApi<{preview:Preview}>('/reports/preview?seniorId='+encodeURIComponent(seniorId)+'&endDate='+encodeURIComponent(endDate)).then(r=>{if(active)setPreview({key:previewKey,value:r.preview});}).catch(e=>{if(active)setPreview({key:previewKey,error:message(e)});});return()=>{active=false;};},[seniorId,endDate,previewKey,previewAttempt]);
+ useEffect(()=>{if(!autoRefresh)return;const timer=setInterval(()=>{if(document.visibilityState==='visible'&&!mutation.current&&!generating.current&&!refreshingRef.current)void refresh();},bundle.reports.some(pending)?10000:30000);const focus=()=>{if(!mutation.current&&!generating.current&&!refreshingRef.current)void refresh();};window.addEventListener('focus',focus);return()=>{clearInterval(timer);window.removeEventListener('focus',focus);};},[autoRefresh,bundle.reports,refresh]);
+ useEffect(()=>{const close=()=>setPrintReport(null);window.addEventListener('afterprint',close);return()=>window.removeEventListener('afterprint',close);},[]);
+ const visible=useMemo(()=>bundle.reports.filter(r=>{
+  const label=reportLabel(r);if(filter==='active'&&r.review.archived||filter==='archived'&&!r.review.archived||filter==='review'&&(label!=='Needs review'||r.review.archived)||filter==='reviewed'&&label!=='Reviewed'||filter==='shared'&&label!=='Shared'||filter==='failed'&&label!=='Failed'||filter==='rejected'&&label!=='Rejected')return false;
+  return !query||[r.text,r.period?.from,r.period?.to,r.method,r.language,r.id].join(' ').toLowerCase().includes(query.toLowerCase());
+ }).sort((a,b)=>sort==='oldest'?a.createdAt.localeCompare(b.createdAt):sort==='period'?(b.period?.to||'').localeCompare(a.period?.to||''):b.createdAt.localeCompare(a.createdAt)),[bundle.reports,filter,query,sort]);
+ const report=visible.find(r=>r.id===selected)||visible[0];
+ async function generate(e:React.FormEvent){e.preventDefault();if(generating.current||mutation.current||!canManage||!coverage?.evidenceEntries||mode==='n8n'&&!connection.configured)return;generating.current=true;setBusy('generate');setError('');
+  const signature=JSON.stringify({seniorId,endDate,language,mode,newVersion});if(generationKey.current?.signature!==signature)generationKey.current={signature,key:crypto.randomUUID()};
+  try{const r=await careApi('/reports','POST',{seniorId,endDate,language,mode,newVersion,idempotencyKey:generationKey.current.key});generationKey.current=null;setNewVersion(false);setSelected(r.report?.id||'');setQuery('');setFilter(r.repeated?'all':'active');await refresh();notify(r.repeated?'The matching saved report or active attempt is shown. No second request was sent.':mode==='n8n'?'AI report saved for processing. It will need care-team review before sharing.':'Recorded-data draft saved for review.');}
+  catch(e){setError(message(e));await refresh();setError(message(e));}finally{generating.current=false;setBusy('');}
+ }
+ async function manage(action:string,r:WeeklyReport,extra:Record<string,unknown>={}){if(mutation.current||generating.current)return null;mutation.current=true;setBusy(action);setError('');
+  const signature=JSON.stringify({action,id:r.id,revision:r.review.revision,...extra});if(actionKey.current?.signature!==signature)actionKey.current={signature,key:crypto.randomUUID()};
+  try{const result=await careApi('/reports/manage','POST',{action,reportId:r.id,revision:r.review.revision,idempotencyKey:actionKey.current.key,...extra});actionKey.current=null;if(['review','restore','share','reopen'].includes(action)){setFilter('active');setSelected(r.id);setQuery('');}await refresh();notify(({note:'Internal review note saved.',review:'Report marked reviewed. Select family recipients to share it.',reject:'Draft rejected. Its family copies are no longer visible.',reopen:'Review reopened. Existing shared copies are unchanged.',archive:'Report archived. Existing family copies are unchanged.',restore:'Report restored to active history.',share:result.changedCopies?'Reviewed summary published to the selected family inboxes.':'Selected family accounts already have this version.',withdraw:'Family copies withdrawn. The report and audit history are preserved.'} as Record<string,string>)[action]||'Report updated.');return typeof result.revision==='number'?result.revision:r.review.revision;}
+  catch(e){await refresh();setError(message(e));return null;}finally{mutation.current=false;setBusy('');}
+ }
+ async function retryFailed(r:WeeklyReport){if(!canManage||busy||!connection.configured)return;mutation.current=true;setBusy('retry');setError('');let key=retryKeys.current.get(r.id);if(!key){key=crypto.randomUUID();retryKeys.current.set(r.id,key);}try{const result=await careApi('/reports','POST',{action:'retry',reportId:r.id,idempotencyKey:key});retryKeys.current.delete(r.id);setSelected(result.report?.id||'');await refresh();notify(result.repeated?'The allocated retry is shown.':'One new attempt was saved from the original evidence.');}catch(e){await refresh();setError(message(e));}finally{mutation.current=false;setBusy('');}}
+ function version(r:WeeklyReport){setEnd(r.period?.to||date);setLanguage(r.language==='hi'?'hi':'en');setMode(r.generation?.llmUsed?'n8n':'local');setNewVersion(true);controlsRef.current?.scrollIntoView({block:'start',behavior:'smooth'});notify('The original report is preserved. Review the selected week and submit to create another version.');}
+ function text(r:WeeklyReport){return reportExportText(seniorName,r,reportLabel(r),reportStamp(r.createdAt));}
+ async function exportReport(r:WeeklyReport,format:'copy'|'download'|'print'){try{if(format==='copy'){await navigator.clipboard.writeText(text(r));notify('Report text copied. Internal review notes were excluded.');}else if(format==='download'){const url=URL.createObjectURL(new Blob([text(r)],{type:'text/plain;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='weekly-summary-'+seniorId+'-'+(r.period?.to||'saved')+'.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}else{setPrintReport(r);requestAnimationFrame(()=>window.print());}}catch(e){notify(message(e));}}
+ const counts={review:bundle.reports.filter(r=>reportLabel(r)==='Needs review').length,shared:bundle.reports.filter(r=>reportLabel(r)==='Shared').length,failed:bundle.reports.filter(r=>reportLabel(r)==='Failed').length};
+ return <div className="weekly-workspace">
+  <section className="page-intro"><div><span className="eyebrow">FAMILY UPDATES</span><h1>Weekly AI summaries</h1><p>Prepare a dated update, check its evidence and choose who receives the reviewed version.</p></div>{onOpenDeliveries&&<button className="button secondary" onClick={onOpenDeliveries}>Notification history</button>}</section>
+  <section className="panel weekly-compose" ref={controlsRef} aria-label="Prepare weekly report"><form onSubmit={generate}><div className="weekly-form-grid">
+   <label>Senior<select value={seniorId} disabled={!!busy} onChange={e=>{setChoice(e.target.value);setSelected('');setNewVersion(false);onSeniorChange?.(e.target.value);}}>{data.seniors?.map(s=><option value={s.id} key={s.id}>{s.name} · {s.id}</option>)}</select></label>
+   <label>Week ending<input type="date" value={endDate} min={data.dataProvenance?.startDate} max={date} required disabled={!!busy} onChange={e=>{setEnd(e.target.value);setNewVersion(false);}}/></label>
+   <label>Language<select value={language} disabled={!!busy} onChange={e=>setLanguage(e.target.value)}><option value="en">English</option><option value="hi">हिन्दी</option></select></label>
+   <label>Method<select value={mode} disabled={!!busy} onChange={e=>setMode(e.target.value)}><option value="n8n">AI summary · n8n model</option><option value="local">Recorded-data summary · no LLM</option></select></label>
+  </div><div className="weekly-period-actions"><button type="button" className="weekly-link" disabled={!!busy} onClick={()=>setEnd(date)}>Latest seven days</button><button type="button" className="weekly-link" disabled={!!busy||!date||!!data.dataProvenance?.startDate&&plus(date,-7)<data.dataProvenance.startDate} onClick={()=>setEnd(plus(date,-7))}>Previous seven days</button><span>{endDate?plus(endDate,-6)+' — '+endDate:'Choose a week-ending date'}</span></div>
+  <label className="weekly-check"><input type="checkbox" checked={newVersion} disabled={!!busy} onChange={e=>setNewVersion(e.target.checked)}/> Create another version even if matching evidence already has a saved draft. A new AI version uses another model request.</label>
+   <div className="weekly-compose-footer"><button className="button primary" disabled={!!busy||!seniorId||!canManage||!coverage?.evidenceEntries||mode==='n8n'&&(!connection.checked||!connection.configured)}>{busy==='generate'?'Saving report request…':mode==='n8n'?'Generate AI draft':'Create recorded-data draft'}</button><span>{mode==='n8n'?'AI creates a review draft; it does not send it to family.':'Computed from observations without a language model.'}</span></div></form>
+   <details className="weekly-connection"><summary>{connection.checked?(connection.configured?'AI connection configured':'AI connection unavailable'):'Checking AI connection…'}</summary><p>{connection.reason}</p><p>Only masked derived facts are sent. Raw notes and account identifiers stay in the care store.</p><button className="button secondary small" onClick={()=>setConnectionAttempt(n=>n+1)}>Recheck connection</button></details>
+  </section>
+  <section className="weekly-preview" aria-label="Evidence preview">{coverage?<><header><h2>Evidence for this week</h2><button className="weekly-link" onClick={()=>setPreviewAttempt(n=>n+1)}>Refresh evidence</button></header><div className="weekly-coverage"><strong>{coverage.observedDays}/7 <small>days with usable entries</small></strong><strong>{coverage.evidenceEntries}<small>source entries</small></strong><strong>{coverage.missingDays}<small>days without usable entries</small></strong><span>{coverage.dataKind.replaceAll('_',' ')} data</span></div><div className="weekly-domains">{coverage.domains.map(d=><span key={d.label}>{d.label}: <strong>{d.entries}</strong></span>)}</div>{coverage.warnings.map(w=><p className="weekly-hint" key={w}>{w}</p>)}<details><summary>Preview supported statements before generation</summary><ul>{coverage.statements.map(s=><li key={s.id}>{s.text[language as 'en'|'hi']||s.text.en}</li>)}</ul></details></>:previewError?<p className="extension-error" role="alert">{previewError} <button className="weekly-link" onClick={()=>setPreviewAttempt(n=>n+1)}>Retry preview</button></p>:<p role="status">Loading the selected week’s evidence…</p>}</section>
+  <div className="weekly-counters"><button onClick={()=>setFilter('review')}><strong>{counts.review}</strong> Need review</button><button onClick={()=>setFilter('shared')}><strong>{counts.shared}</strong> Shared with family</button><button onClick={()=>setFilter('failed')}><strong>{counts.failed}</strong> Failed attempts</button></div>
+  <section className="weekly-toolbar" aria-label="Report history controls"><label>View<select value={filter} onChange={e=>setFilter(e.target.value)}>{[['active','All active'],['review','Needs review'],['reviewed','Reviewed, not shared'],['shared','Shared'],['failed','Failed attempts'],['rejected','Rejected'],['archived','Archived'],['all','Entire history']].map(([v,label])=><option key={v} value={v}>{label}</option>)}</select></label><label>Search history<input type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Text, date or report reference"/></label><label>Sort<select value={sort} onChange={e=>setSort(e.target.value)}><option value="newest">Newest created</option><option value="oldest">Oldest created</option><option value="period">Latest reporting week</option></select></label><button className="button secondary" disabled={refreshing||!!busy} onClick={()=>void refresh()}>{refreshing?'Refreshing…':'Refresh history'}</button><label className="weekly-check"><input type="checkbox" checked={autoRefresh} onChange={e=>setAutoRefresh(e.target.checked)}/> Auto-refresh</label></section>
+  {error&&<p className="extension-error" role="alert">{error}</p>}{busy&&<p className="weekly-operation" role="status">Saving {busy.replaceAll('_',' ')}…</p>}
+  {loading?<p className="panel weekly-empty" role="status">Loading report history…</p>:!visible.length?<section className="panel weekly-empty"><h2>{bundle.reports.length?'No reports match these controls':'No saved report for this senior'}</h2><p>{bundle.reports.length?'Change the view or search to see other reports.':'Select a reporting week and inspect the available evidence above.'}</p>{bundle.reports.length>0&&<button className="button secondary" onClick={()=>{setFilter('active');setQuery('');}}>Reset history controls</button>}</section>:<div className="weekly-layout"><aside className="weekly-report-list" aria-label="Saved reports"><span>{visible.length} shown · {bundle.reports.length} latest records</span>{visible.map(r=><button key={r.id} className={report?.id===r.id?'selected':''} onClick={()=>setSelected(r.id)} aria-pressed={report?.id===r.id}><strong>{r.period?.from||'Saved attempt'}{r.period?.to?' — '+r.period.to:''}</strong><span>{reportLabel(r)} · {r.language==='hi'?'हिन्दी':'English'}</span><small>{reportStamp(r.createdAt)}</small></button>)}</aside>{report&&<WeeklyReportDetail key={report.id} report={report} families={bundle.families} sharingConsent={bundle.sharingConsent} canManage={canManage&&bundle.managementAvailable} busy={!!busy} onAction={manage} onRetry={retryFailed} onVersion={version} onExport={(r,f)=>void exportReport(r,f)}/>}</div>}
+  {printReport&&createPortal(<section className="weekly-print-report"><h1>{seniorName} · Weekly wellbeing summary</h1><p>{printReport.period?.from} — {printReport.period?.to} · {reportLabel(printReport)}</p><p>{printReport.text}</p><footer>Generated {reportStamp(printReport.createdAt)}. {printReport.generation?.llmUsed?'AI-generated':'Recorded-data'} text. Internal notes are excluded.</footer></section>,document.body)}
+ </div>;
 }

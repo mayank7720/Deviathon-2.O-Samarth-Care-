@@ -77,7 +77,7 @@
       "typeVersion": 4.2,
       "parameters": {
         "method": "POST",
-        "url": "https://samarth-care-codeburners.vercel.app/api/integrations/n8n/claim",
+        "url": "https://swasthsync.vercel.app/api/integrations/n8n/claim",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -298,7 +298,7 @@
       "typeVersion": 4.2,
       "parameters": {
         "method": "POST",
-        "url": "https://samarth-care-codeburners.vercel.app/api/integrations/n8n/callback",
+        "url": "https://swasthsync.vercel.app/api/integrations/n8n/callback",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -455,7 +455,7 @@
       "typeVersion": 4.2,
       "parameters": {
         "method": "POST",
-        "url": "https://samarth-care-codeburners.vercel.app/api/integrations/n8n/callback",
+        "url": "https://swasthsync.vercel.app/api/integrations/n8n/callback",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [

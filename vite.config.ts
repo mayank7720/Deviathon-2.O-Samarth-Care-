@@ -46,11 +46,6 @@ export default defineConfig(async ({ command }) => {
   const { cloudflare } = await import("@cloudflare/vite-plugin");
 
   return {
-    resolve: {
-      alias: {
-        "@/lib/server-runtime.mjs": fileURLToPath(new URL("./lib/server-runtime.cloudflare.mjs", import.meta.url)),
-      },
-    },
     server: {
       ...(managedLinux
         ? { host: "0.0.0.0", allowedHosts: ["terminal.local"] }
@@ -61,6 +56,16 @@ export default defineConfig(async ({ command }) => {
     },
     plugins: [
       vinext(),
+      {
+        name: "swasthsync-cloudflare-runtime",
+        enforce: "post",
+        // vinext adds the broad tsconfig '@' alias in its config hook.
+        // Add this exact override afterwards so first-match alias resolution
+        // selects Cloudflare bindings for the local fixture and worker build.
+        config: () => ({ resolve: { alias: {
+          "@/lib/server-runtime.mjs": fileURLToPath(new URL("./lib/server-runtime.cloudflare.mjs", import.meta.url)),
+        } } }),
+      },
       sites({ mockAuth: !managedLinux }),
       connectorPreview(),
       cloudflare({

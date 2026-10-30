@@ -44,6 +44,15 @@ before(() => {
   }
 });
 after(() => db.db.close());
+
+test('integration status and individual analysis avoid rewriting the cohort score cache',async()=>{
+ const savedPrepare=db.prepare.bind(db);let scoreWrites=0;
+ db.prepare=sql=>{if(/INSERT.*care_daily_scores/iu.test(sql))scoreWrites++;return savedPrepare(sql);};
+ try{
+  const status=await call('integrations/status');assert.equal(status.status,200);assert.equal(status.data.reports.local,true);assert.equal(scoreWrites,0);
+  const analysis=await call('analysis/S001?days=7');assert.equal(analysis.status,200);assert.equal(analysis.data.monitoring.period.days,7);assert.equal(analysis.data.analysis.domains.length,9);assert.equal(scoreWrites,0);
+ }finally{db.prepare=savedPrepare;}
+});
 async function call(
   path,
   {
@@ -82,6 +91,27 @@ async function role(name) {
   assert.equal(result.status, 200);
   return result.response.headers.get("set-cookie").split(";")[0];
 }
+
+test('phone operations bypass clinical history and score processing without weakening role checks',async()=>{
+ const savedPrepare=db.prepare.bind(db),savedPhone=db.phoneIntake,savedCheckins=db.smsCheckins,savedContacts=db.accountContacts;
+ const invoked=[];
+ db.phoneIntake=async action=>{invoked.push('phone:'+action);return {requests:[]};};
+ db.smsCheckins=async action=>{invoked.push('checkins:'+action);return {checkins:[]};};
+ db.accountContacts=async()=>[];
+ db.prepare=sql=>{
+  assert.ok(!/care_daily_scores|care_runtime|care_consents/iu.test(sql),'Phone operations touched derived clinical storage');
+  const query=savedPrepare(sql);
+  if(/SELECT id,kind,senior_id,payload,created_at/iu.test(sql))return {...query,bind:(...values)=>{assert.ok([JSON.stringify(['telephony_bridge']),JSON.stringify(['telephony_job','call_bot_review'])].includes(values[3]),'Unexpected history scan');return query.bind(...values);}};
+  return query;
+ };
+ try{
+  for(const path of ['phone-intake','sms-checkins','speech/status','telephony/config','telephony/routing','telephony/jobs'])assert.equal((await call(path)).status,200,path);
+  assert.deepEqual(invoked,['phone:list','checkins:list']);
+  const cookie=await role('family');
+  for(const path of ['phone-intake','sms-checkins','speech/status','telephony/config','telephony/routing','telephony/jobs'])assert.equal((await call(path,{cookie})).status,403,path);
+  assert.deepEqual(invoked,['phone:list','checkins:list']);
+ }finally{db.prepare=savedPrepare;for(const [key,value]of Object.entries({phoneIntake:savedPhone,smsCheckins:savedCheckins,accountContacts:savedContacts})){if(value===undefined)delete db[key];else db[key]=value;}}
+});
 
 test("bootstrap ranks all 200 synthetic seniors and reports honest model metrics", async () => {
   const { status, data } = await call("bootstrap");

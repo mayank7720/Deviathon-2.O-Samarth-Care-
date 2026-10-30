@@ -55,9 +55,9 @@ await api("analysis/S002", "senior", "GET", undefined, 403);
 await api("session", "family", "POST", { role: "coordinator" }, 403);
 await api(
   "signals",
-  "operations",
+  "family",
   "POST",
-  { seniorId: "S001", type: "note", note: "This write must be denied." },
+  { seniorId: "S002", type: "note", note: "This out-of-scope fixture write must be denied." },
   403,
 );
 

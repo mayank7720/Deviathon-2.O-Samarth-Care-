@@ -22,3 +22,24 @@ test('channel permissions can change without exposing or replacing the saved num
  assert.equal((await invoke(admin,{action:'permissions',smsConsent:false,callConsent:true,recipientConfirmed:true},db)).status,200);
  assert.deepEqual(saved,{userId,smsConsent:false,callConsent:true,confirmed:true});assert.equal(saved.phone,undefined);
 });
+
+test('the password endpoint refuses every nonadministrator portal before invoking the administrator service',async()=>{
+ let calls=0;const db={accountDirectory:async()=>[],adminAccount:async()=>{calls++;return {ok:true};}};
+ const body={password:'A private new password 24!',confirmReset:true,idempotencyKey:'00000000-0000-0000-0000-000000000002'};
+ for(const session of [{role:'coordinator',isAdmin:true},{role:'family',isAdmin:true},{role:'senior',isAdmin:true},{role:'operations',isAdmin:false}]){
+  const response=await handleAccountRoute({path:`accounts/${userId}/password`,request:new Request('https://care.example/api/accounts/'+userId+'/password',{method:'POST'}),body,db,context:{session}});
+  assert.equal(response.status,403);
+ }
+ assert.equal(calls,0);
+});
+
+test('the Operations password endpoint validates confirmation and strength and binds the target to the URL',async()=>{
+ const calls=[],admin={role:'operations',isAdmin:true},body={password:'A private new password 24!',confirmReset:true,idempotencyKey:'00000000-0000-0000-0000-000000000002'};
+ const db={accountDirectory:async()=>[],adminAccount:async(action,details)=>{calls.push({action,details});return {ok:true,passwordChosen:true};}};
+ const invokePassword=change=>handleAccountRoute({path:`accounts/${userId}/password`,request:new Request('https://care.example/api/accounts/'+userId+'/password',{method:'POST'}),body:{...body,...change},db,context:{session:admin}});
+ for(const change of [{confirmReset:false},{password:'short'},{password:'x'.repeat(129)},{idempotencyKey:''}])assert.equal((await invokePassword(change)).status,400);
+ assert.equal(calls.length,0);
+ const response=await invokePassword({targetUserId:'00000000-0000-0000-0000-000000000003'});
+ assert.equal(response.status,200);assert.equal(calls.length,1);assert.equal(calls[0].action,'password');assert.equal(calls[0].details.targetUserId,userId);
+ assert.equal(calls[0].details.password,body.password);assert.equal((await response.json()).passwordChosen,true);
+});

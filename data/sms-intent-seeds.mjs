@@ -1,0 +1,67 @@
+/** Authored synthetic scenarios, not patient records. Keep each scenario and all
+ * of its language/typography variants in ONE split. Splits are fixed in advance. */
+const rows=(label,items)=>items.map(([group,en,hi,hinglish],index)=>({group:`${label}:${group}`,label,split:index<8?'train':index<10?'calibration':'test',texts:{en,hi,hinglish}}));
+export const SMS_SEEDS=[
+ ...rows('help',[
+  ['help-basic','I need help','मुझे मदद चाहिए','mujhe madad chahiye'],
+  ['assistance','Please assist me','कृपया मेरी सहायता करें','meri sahayata kijiye'],
+  ['support','I need your support now','मुझे अभी सहारा चाहिए','mujhe abhi support chahiye'],
+  ['trouble','I am in trouble and need help','मैं परेशानी में हूँ मदद करें','main pareshani mein hu madad karo'],
+  ['emergency','SOS please help me now','बचाओ मुझे तुरंत मदद चाहिए','bachao turant madad chahiye'],
+  ['unable-alone','I cannot manage alone please help','मैं अकेले नहीं संभाल पा रहा मदद करें','akele sambhal nahi pa raha madad karo'],
+  ['someone','Can someone come and help me','क्या कोई मेरी मदद कर सकता है','koi meri madad kar sakta hai'],
+  ['need-team','I need the care team to help me','मुझे देखभाल टीम की मदद चाहिए','care team ki madad chahiye'],
+  ['request-assistance','Could you send someone to assist me','क्या आप सहायता के लिए किसी को भेज सकते हैं','sahayata ke liye kisi ko bhej sakte ho'],
+  ['need-care','I urgently need support from my care team','मुझे देखभाल टीम का सहारा तुरंत चाहिए','mujhe care team se turant sahara chahiye'],
+  ['reach-team','Please get the care team to help me','कृपया मदद के लिए देखभाल टीम को बुलाएं','madad ke liye care team ko bula do'],
+  ['cannot-manage','I need assistance because I cannot cope alone','मैं अकेले नहीं संभाल सकता सहायता चाहिए','akele sambhal nahi sakta sahayata chahiye'],
+ ]),
+ ...rows('callback',[
+  ['phone-me','Please phone me','कृपया मुझे फोन करें','mujhe phone kijiye'],
+  ['ring-me','Can you ring me','क्या आप मुझे कॉल कर सकते हैं','kya aap mujhe ring kar sakte ho'],
+  ['return-call','Please call me back','मुझे वापस फोन करें','mujhe wapas call karo'],
+  ['request-call','I would like a phone call','मुझे एक फोन कॉल चाहिए','mujhe ek phone call chahiye'],
+  ['speak-coordinator','I want to speak to my coordinator','मुझे अपने केयर कोऑर्डिनेटर से बात करनी है','care coordinator se baat karni hai'],
+  ['talk-team','Please let me talk to the care team','मुझे देखभाल टीम से बात कराएं','care team se meri baat kara do'],
+  ['available','I am available for a call please ring','मैं फोन पर बात करने के लिए उपलब्ध हूँ कॉल करें','main baat karne ko free hu call karo'],
+  ['contact-me','Please contact me by telephone','कृपया फोन पर मुझसे संपर्क करें','phone pe mujhse sampark karo'],
+  ['missed-ring','I missed your call please ring again','आपकी कॉल छूट गई फिर फोन करें','aapka call miss hua dubara ring karo'],
+  ['conversation','Can we have a phone conversation','क्या हम फोन पर बात कर सकते हैं','kya hum phone par baat kar sakte hain'],
+  ['want-talk','I want a callback to discuss something','कुछ बात करने के लिए मुझे वापस कॉल चाहिए','kuch baat karni hai callback chahiye'],
+  ['telephone','Could somebody telephone me please','कृपया कोई मुझे फोन कर सकता है','koi mujhe telephone kar sakta hai'],
+ ]),
+ ...rows('concern',[
+  ['pain','My stomach hurts and I feel sick','मेरे पेट में दर्द है और तबीयत खराब है','pet mein dard hai tabiyat kharab hai'],
+  ['appetite','I have not eaten and have no appetite','भूख नहीं है और खाना नहीं खाया','bhookh nahi hai khana nahi khaya'],
+  ['sleep','I cannot sleep at night','रात को नींद नहीं आती','raat ko neend nahi aati'],
+  ['weak','I feel weak tired and unwell','मुझे कमजोरी और थकान है तबीयत खराब है','kamzori thakaan hai tabiyat kharab hai'],
+  ['medicine','I forgot to take my medicine','मैं अपनी दवा लेना भूल गया','dawai lena bhool gaya'],
+  ['lonely','I feel lonely and need company','मैं अकेलापन महसूस कर रहा हूँ','akela mehsoos kar raha hu'],
+  ['fall','I fell and hurt myself today','मैं आज गिर गया और चोट लगी','aaj gir gaya chot lagi'],
+  ['breathing','I am having difficulty breathing','मुझे सांस लेने में दिक्कत है','saans lene mein dikkat ho rahi hai'],
+  ['dizzy','I feel dizzy and unwell','मुझे चक्कर आ रहे हैं तबीयत खराब है','chakkar aa rahe tabiyat kharab hai'],
+  ['fever','I have a fever and feel very sick','मुझे बुखार है और तबीयत खराब है','bukhar hai bahut bura lag raha hai'],
+  ['nausea','I feel sick and want to vomit','मुझे उल्टी जैसा लग रहा है','mujhe ulti jaisa lag raha hai'],
+  ['confused','I feel confused and cannot remember where I am','मुझे उलझन है याद नहीं कि मैं कहाँ हूँ','uljhan hai yaad nahi main kahan hu'],
+ ]),
+ ...rows('other',[
+  ['well','I am fine and feeling well','मैं ठीक हूँ और अच्छा महसूस कर रहा हूँ','main theek hu achha lag raha hai'],
+  ['deny-help','I do not need help please do not assist','मुझे मदद नहीं चाहिए सहायता की जरूरत नहीं','madad nahi chahiye sahayata ki zarurat nahi'],
+  ['deny-call','Please do not call me I do not want a callback','कृपया मुझे फोन मत करें कॉल नहीं चाहिए','phone mat karo callback nahi chahiye'],
+  ['deny-symptoms','No pain no confusion and no fall','दर्द नहीं है उलझन नहीं है और नहीं गिरा','dard nahi uljhan nahi gira nahi'],
+  ['money','My bank balance has fallen but I am fine','मेरे बैंक में पैसे कम हुए हैं मैं ठीक हूँ','bank balance gira hai main theek hu'],
+  ['weather','The weather is pleasant and the cricket match was good','मौसम अच्छा है और क्रिकेट मैच अच्छा था','mausam achha hai cricket match achha tha'],
+  ['hardware','My phone battery needs a new charger','मेरे फोन की बैटरी को नया चार्जर चाहिए','phone ki battery ke liye charger chahiye'],
+  ['education','What is chest pain and how can falls be prevented','सीने में दर्द क्या है और गिरने से कैसे बचें','seene mein dard kya hota hai girne se kaise bache'],
+  ['historical','I fell last year but recovered completely','पिछले साल गिरा था अब पूरी तरह ठीक हूँ','pichle saal gira tha ab poori tarah theek hu'],
+  ['other-person','My neighbour has a fever and my friend fell','मेरे पड़ोसी को बुखार है और दोस्त गिरा','mere padosi ko bukhar hai dost gira'],
+  ['marketing','Call us for a discounted phone and free health tips','सस्ते फोन और हेल्थ टिप्स के लिए हमें कॉल करें','saste phone aur health tips ke liye hume call karo'],
+  ['personal','The family picnic was fun and I enjoyed the food','परिवार के साथ घूमना अच्छा लगा और खाना पसंद आया','family picnic achhi thi khana achha laga'],
+ ]),
+];
+
+export const SMS_AUGMENTATION={
+ en:{prefix:['','Hello, ','Hi, ','Good morning, ','Good evening, ','Namaste, ','Care team, ','Dear team, '],suffix:['',' Thank you.',' Thanks.',' Please respond.',' This is my update.',' Sent from my phone.',' Regards.',' That is my message.']},
+ hi:{prefix:['','नमस्ते, ','नमस्कार, ','सुप्रभात, ','जी, ','केयर टीम, ','आपको नमस्ते, ','सुनिए, '],suffix:['',' धन्यवाद।',' शुक्रिया।',' कृपया जवाब दें।',' यह मेरी जानकारी है।',' फोन से भेजा है।',' सादर।',' यही मेरा संदेश है।']},
+ hinglish:{prefix:['','Namaste, ','Hello ji, ','Namaskar, ','Suniye, ','Care team, ','Good morning ji, ','Ji, '],suffix:['',' dhanyavaad.',' shukriya.',' jawab dijiye.',' ye mera update hai.',' phone se bheja hai.',' thanks ji.',' bas yehi message hai.']},
+};

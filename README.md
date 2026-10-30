@@ -1,45 +1,53 @@
-# 💙 Samarth Care — Care, a Little Earlier
+<img src="public/favicon.svg" width="56" height="56" alt="SwasthSync logo">
 
-### AI-Powered Senior Care & Preventive Wellness
+# SwasthSync
 
-**Samarth Care** is a technology-driven platform focused on making senior care smarter, more accessible, and proactive. Our goal is to help elderly individuals and their caregivers through technology-enabled wellness support.
+**Explained daily care priorities and an SMS help route for seniors living at home.**
 
-🌐 **Live Demo:** [Visit Samarth Care](https://samarth-care-codeburners.vercel.app/)
+[![Verify](https://github.com/mayank7720/Deviathon-2.O-Samarth-Care-/actions/workflows/verify.yml/badge.svg)](https://github.com/mayank7720/Deviathon-2.O-Samarth-Care-/actions/workflows/verify.yml)
 
-[Round 1 presentation](docs/round1/CodeBurner-DEVS09-Samarth-Care-Round1.pptx) · [Concept brief](docs/Samarth-Care-Technical-Writeup.pdf) · [Demo script](docs/DEMO_SCRIPT.md)
+[Live website](https://swasthsync.vercel.app/) · [Run locally](docs/QUICKSTART.md) · [Demo walkthrough](docs/DEMO_SCRIPT.md) · [Architecture](docs/ARCHITECTURE.md) · [Feature status](docs/PROJECT_STATUS.md)
 
-**Latest algorithm release:** [personal-risk-v3](docs/ALGORITHM_V3_2026_10_30.md) adds representative identity groups, actionable reported concerns during reference collection, additional bilingual phrases and consistent evidence reports. It builds on [v2's robust personal references, calibrated Isolation Forest and sustained-change detection](docs/ALGORITHM_UPGRADE_2026_10_30.md). The release notes show measured results, coordinator workload and limitations; older presentation/PDF figures are dated checkpoints.
+**Deviathon 2.0 | CodeBurner | DEVS09 | DEV_104**
 
-## 🎯 Problem We Solve
+This is the consolidated hackathon showcase repository. Ongoing development lives in [RageRizzzler/Samarth-Care](https://github.com/RageRizzzler/Samarth-Care). The project responds to Samarth Life Management's *Early Warning for Seniors Living at Home* problem statement. It is an independent student prototype with synthetic records, not Samarth's production care system.
 
-Senior citizens may face challenges accessing timely care, monitoring their well-being, and receiving consistent support. Samarth Care aims to make senior care more accessible through a user-friendly digital experience.
+![Public SwasthSync website preview](docs/assets/swasthsync-home.jpg)
 
-## ✨ Key Features
+## The care journey
 
-* 💙 Senior-focused and user-friendly interface
-* 🧠 Daily rules, personal baselines and an anomaly model with reasons and suggested human follow-up
-* 📊 Dated vitals, medication logs, Hindi/English/Hinglish notes, graphs and day/week/month history
-* ❤️ Focus on preventive care and early attention
-* 📱 Responsive design for different devices
-* 🔐 Separate Operations Manager, coordinator, family and senior access, assigned scopes and family-sharing consent
-* 📝 Evidence-backed weekly drafts with coordinator review; optional configured n8n/LLM generation
+A care coordinator needs to decide who needs attention today, understand the evidence and record what happens next. Seniors need an accessible route into that workflow.
 
-The showcase uses **200 fictional seniors over 90 calendar days**, with reference-informed synthetic histories and explicit missing entries. It contains no real patient cohort. Scores flag concerns for a person to review; they never establish a diagnosis. The project draws on Samarth's public operating context and is not affiliated with its private care systems. See [data provenance](docs/DATA_REALISM.md), [requirements](docs/REQUIREMENTS.md) and [official company context](docs/SAMARTH_CONTEXT.md).
+1. A senior sends **HELP** from their registered phone to the configured project helpline. They do not need to open the website.
+2. The SMS receiver authenticates the gateway event, matches the account and saves a support request in the cloud.
+3. The assigned coordinator receives a notice identifying the senior and supported reported issue. Family notices require current sharing and channel consent. Plain HELP retains an unconfirmed reason.
+4. Staff review the request alongside vitals, medicine logs, bilingual notes and personal changes, then record a follow-up and its outcome.
+5. Staff can prepare an evidence-backed weekly AI draft, review it and share the reviewed version with selected linked family accounts.
 
-## 🛠️ Tech Stack
+**SMS delivery is not proof of human response.** This prototype does not diagnose conditions, prescribe treatment, dispatch emergency services or guarantee a response time. Voice-only accessibility remains unfinished.
 
-* **Frontend:** React 19 and Next.js 16; Recharts and accessible SVG charts
-* **Styling:** Tailwind CSS
-* **Storage and access:** Supabase Auth, Postgres and row-level policies; Cloudflare D1 for local fixtures
-* **Algorithms:** Local JavaScript Isolation Forest, robust median/MAD references, repeated-change rules and bilingual lexical NLP
-* **Optional integrations:** n8n report orchestration, local Whisper transcription, Android SIM SMS relay
-* **Deployment:** Vercel website and Supabase scheduled Edge processor
+## What works, and what remains unfinished
 
-## 🚀 Getting Started
+| Area | Showcase status |
+|---|---|
+| Four portals | Operations administration, scoped coordinators, linked family members and seniors; server-side role checks |
+| Daily priority | Rules, measured personal references, calibrated Isolation Forest and sustained-change evidence, with reasons and a suggested human action |
+| Records and monitoring | Dated vitals, medication logs and Hindi/English/Hinglish notes; day/week/month charts and explicit missing data |
+| HELP SMS | Physical inbound HELP, saved cloud request and coordinator/family delivery receipts have been verified. Live operation needs the Android phone, SIM, laptop and receiver online. |
+| Weekly AI summaries | Published n8n workflow has generated a genuine model draft. Evidence preview, review, recipient selection and publication history are cloud-backed. Inference is explicitly requested. |
+| Medication patterns | Logged missed-dose and scheduled-time patterns; missing/pending/conflicting entries remain unknown. No drug-interaction checker. |
+| SMS intent ML | Authored synthetic classifier evaluated in **shadow mode**. It failed release gates; automatic model-only routing is disabled. Explicit command and supported cue rules remain separate. |
+| Two-way SMS check-ins | Implemented and tested in code; full physical question-and-reply acceptance remains pending. |
+| AI Call Bot | **Under development; excluded from the live showcase.** Prepared code and controls do not establish a completed application bot call. |
+| Sensors and feedback | Experimental unconfirmed motion candidates and feedback collection. Continuous wearable validation and demonstrated feedback-driven improvement remain outstanding. |
 
-Requires Node.js 22.13 or newer, npm and Git. For the isolated local fixture showcase:
+See [current status and limits](docs/PROJECT_STATUS.md) and [PS coverage](docs/REQUIREMENTS.md). Older dated release notes are historical checkpoints.
 
-```text
+## Quick start: isolated local demo
+
+Requires **Node.js 22.13+**, npm and Git. No cloud credentials, model subscription or telephone provider is required for the local synthetic fixture.
+
+```bash
 git clone https://github.com/mayank7720/Deviathon-2.O-Samarth-Care-.git
 cd Deviathon-2.O-Samarth-Care-
 npm ci
@@ -47,30 +55,72 @@ npm run db:init
 npm run dev
 ```
 
-Open the loopback URL printed by the server, normally port 5173. Fixture roles are available only in explicit loopback development. They do not exercise hosted authentication. To use the connected Supabase workspace, stop that server, then run `npm run supabase:configure` and `npm run dev:supabase`, or double-click **Start Samarth Care.cmd** on Windows. Hosted access requires an assigned account; private credentials and local environment files are excluded from Git. See [Supabase setup](docs/SUPABASE.md), [accounts](docs/ACCOUNTS.md) and [Vercel hosting](docs/VERCEL.md).
+Open **http://127.0.0.1:5173/** and use the local role options on the sign-in page. They exist only in explicit loopback fixture mode and are not public website credentials. The local SQLite/D1 fixture does not reproduce every cloud-only account, report-management or integration operation.
 
-Run `npm test` for behavior checks, `npm run evaluate:representative` for the current profile-stratified and historical split reports, and `npm run evaluate:realistic -- --metrics-only` for the current algorithms on the historical identity allocation. Results go into ignored `outputs/`. The [v3 evaluation](docs/evaluation/personal-risk-v3.json) includes exact case counts, subgroup coverage, calibration, workload and limitations. Clinical precision, recall and F1 remain unestablished; unlabelled days are not confirmed healthy.
+For hosted authentication, your own Supabase setup, environment templates and troubleshooting, follow [QUICKSTART](docs/QUICKSTART.md). Hosted access requires an assigned account; private demo logins are supplied separately to evaluators.
 
-## Integration status and next work
+## Architecture
 
-Computed reports and local scoring require no paid inference service. The user's n8n subscription does not itself provide free model or telephone service. New n8n generation remains configured for the local application; the public site serves computed reports and saved authorized reports. Android SMS needs the paired device, approved destination and SIM plan; local speech needs its paired process. A prepared call bridge is not proof of an autonomous call. See [n8n setup](docs/N8N.md), [telephony](docs/TELEPHONY.md), [local speech](docs/LOCAL_SPEECH.md) and [algorithm status](docs/ALGORITHM_V3_2026_10_30.md).
+```mermaid
+flowchart LR
+    S[Senior's basic phone] -->|SMS| G[Android SIM gateway and local receiver]
+    G -->|Authenticated event| A[Protected application API]
+    U[Care team and consented family] --> W[Next.js on Vercel]
+    W --> A
+    A --> D[Supabase Auth and Postgres]
+    D --> P[Scheduled cloud processing]
+    P --> R[Rules and personal anomaly scoring]
+    R --> D
+    A -->|Masked report facts and signed job| N[n8n report workflow]
+    N --> M[LLM report plan]
+    M -->|Signed callback and validation| A
+    D --> H[Human review and follow-up]
+```
 
-## 🔮 Future Scope
+User traffic uses the signed-in identity and scoped database policies. Background workers have separate protected capabilities. n8n orchestrates reports; it does not supply telephone service. [Architecture and privacy boundaries](docs/ARCHITECTURE.md)
 
-* Independent clinician-adjudicated evaluation and representative language/device studies
-* Measured coordinator workload, accessibility and 10,000-person operating costs
-* Validated real-world call automation and any clinically reviewed medicine-interaction capability
+## AI, data and evaluation
 
-## AI and third-party disclosure
+- **200 fictional seniors over 90 calendar days**, with 17,226 observed entries in the default reference-informed cohort. Gaps and modality-specific missingness are intentional.
+- Starting distributions use documented **MITRE Synthea aggregate references**. Synthea and our generated records are synthetic; this is not an Indian patient cohort.
+- **Personal risk v3:** robust median/MAD references, explicit rules, a 48-tree Isolation Forest with nine features, separate calibration and sustained-change checks.
+- **Identity split:** 120 fitting, 30 calibration and 50 evaluation seniors. Later observations do not enter an earlier score.
+- **Representative synthetic result:** review priority on 28/40 authored case-days (70%); high priority on 17/40 (42.5%). Only two authored cases are represented. Mean first review is **four days after onset**. These results do not establish clinical precision, recall or useful early-warning lead time.
+- **Weekly LLM:** selects and orders allowed computed facts; the server validates and renders the result. It does not determine a diagnosis or daily risk score. Computed reports are labelled when no LLM is used.
 
-The prototype was developed with AI coding assistance (Codex) and open-source software. Team members remain responsible for reviewing and understanding the implementation. Optional model reports select evidence-backed facts and remain drafts until human review. The synthetic data uses public Synthea aggregate references, documented in [DATA_REALISM.md](docs/DATA_REALISM.md). Model/method references and limits appear in the [technical write-up](docs/TECHNICAL_WRITEUP.md) and current algorithm notes.
+[Data provenance](docs/DATA_REALISM.md) · [Risk evaluation](docs/ALGORITHM_V3_2026_10_30.md) · [Frozen results](docs/evaluation/personal-risk-v3.json) · [SMS classifier evaluation](docs/SMS_MODEL_EVALUATION.md) · [n8n report contract](docs/N8N.md)
 
-## 👥 Team
+## Verification
 
-**Team CodeBurners**
+```bash
+npm run check:repo
+npm test
+npm run typecheck
+npm run build:vercel
+npm run evaluate:representative
+```
 
-💻 [GitHub Repository](https://github.com/mayank7720/Deviathon-2.O-Samarth-Care-) | 🌐 [Live Project](https://samarth-care-codeburners.vercel.app/)
+Evaluation output goes into ignored `outputs/`. The latest consolidated source passed **516 automated behaviour checks**, TypeScript and a production build. Engineering tests, synthetic model metrics and physical carrier acceptance are separate forms of evidence. Hosted SQL fixtures need a separate test project and are not run by `npm test`.
 
-## 💙 Our Vision
+CI validates repository hygiene, behaviour, types and both supported build paths without production credentials. See [CONTRIBUTING](CONTRIBUTING.md).
 
-**Care, a little earlier. Support, a little closer.**
+## Project layout
+
+| Path | Purpose |
+|---|---|
+| `app/` | Public pages, protected workspace, role-specific components and API entry point |
+| `lib/` | Scoring, access checks, reports, SMS understanding, workflow and storage adapters |
+| `supabase/` | Ordered migrations and protected background functions |
+| `data/`, `public/showcase-data.json` | Synthetic/reference assets and authored language examples |
+| `n8n/` | Workflow builders and importable report templates |
+| `scripts/`, `bridge/` | Local setup, evaluation, SMS relay, speech and experimental calling infrastructure |
+| `tests/` | Behaviour regressions and separately invoked database fixtures |
+| `docs/` | Setup, demo, architecture, evidence and dated release history |
+
+## Team and disclosures
+
+**CodeBurner, DEVS09:** Mayank Raj, Raghav Agarwal, Aditya Sharma and Dev Thakur.
+
+The implementation uses open-source frameworks, cited methods and AI coding assistance from Codex/ChatGPT and Claude. Team members remain responsible for reviewing and explaining the code. See [third-party acknowledgements](THIRD_PARTY_NOTICES.md), [security guidance](SECURITY.md) and the [documentation index](docs/README.md).
+
+Showcase operation uses existing free tiers, hackathon n8n/model credits and an included-SMS SIM plan. These allocations do not establish zero-cost production operation or proven capacity for 10,000 seniors. No licence for original project code is granted by this README; third-party components retain their respective licences.
